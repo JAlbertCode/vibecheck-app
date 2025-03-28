@@ -1,0 +1,13 @@
+{
+  "model": "sdxl:1.0",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{{prompt}}"
+    }
+  ],
+  "stream": false,
+  "options": {
+    "image_size": "768x768"
+  }
+}
