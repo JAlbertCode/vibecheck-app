@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { getDefaultImage } from '../utils/defaultImages';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Frog } from '../utils/supabase';
 
@@ -10,6 +11,17 @@ interface FrogDetailsProps {
 
 export default function FrogDetails({ isOpen, onClose, frog }: FrogDetailsProps) {
   if (!frog) return null;
+  
+  // Generate default logo image if needed
+  const [logoImage, setLogoImage] = useState<string>(frog.logo_url || '');
+  
+  useEffect(() => {
+    if (!frog.logo_url || frog.logo_url.includes('placeholder.com')) {
+      setLogoImage(getDefaultImage(frog.name));
+    } else {
+      setLogoImage(frog.logo_url);
+    }
+  }, [frog]);
 
   // Format reflection questions
   const reflectionQuestions = [
@@ -76,7 +88,7 @@ export default function FrogDetails({ isOpen, onClose, frog }: FrogDetailsProps)
             {/* Community image and bio */}
             <div className="flex flex-col md:flex-row gap-4 mb-6">
               <div className="flex-shrink-0">
-                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-lily-green">
+                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-lily-green relative">
                   {frog.image_url ? (
                     <img
                       src={frog.image_url}
@@ -90,6 +102,18 @@ export default function FrogDetails({ isOpen, onClose, frog }: FrogDetailsProps)
                       </span>
                     </div>
                   )}
+                  
+                  {/* Logo overlay */}
+                  <div className="absolute bottom-0 right-0 w-12 h-12 rounded-full bg-white p-1 border-2 border-lily-green shadow">
+                    <img
+                      src={logoImage}
+                      alt={`${frog.name} logo`}
+                      className="w-full h-full object-contain rounded-full"
+                      onError={() => {
+                        setLogoImage(getDefaultImage(frog.name));
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
               

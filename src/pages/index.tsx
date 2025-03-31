@@ -8,6 +8,7 @@ import Header from '../components/Header';
 import { createFrog, getFrogs, updateFrogImage, updateFrog, getFrogById, type Frog, type VibeMatch as VibeMatchType } from '../utils/supabase';
 import { generateFrogImage, compareVibes } from '../utils/lilypad';
 import { useRouter } from 'next/router';
+import { getDefaultImage } from '../utils/defaultImages';
 
 // Define our app flow steps
 type FlowStep = 'SELECT_FROG' | 'CREATE_FROG' | 'BROWSE_FROGS' | 'SHOW_MATCH';
@@ -32,6 +33,19 @@ export default function Home() {
   const [editingFrog, setEditingFrog] = useState<Frog | null>(null); // For edit functionality
   
   const router = useRouter();
+  
+  // Pre-generate default images for all frogs when they load
+  useEffect(() => {
+    if (typeof window !== 'undefined' && frogs.length > 0) {
+      // Pre-generate all default images in the background
+      frogs.forEach(frog => {
+        if (!frog.logo_url || frog.logo_url.includes('placeholder')) {
+          // This will cache the image for later use
+          getDefaultImage(frog.name);
+        }
+      });
+    }
+  }, [frogs]);
   
   // Load frogs on initial render
   useEffect(() => {

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { getDefaultImage } from '../utils/defaultImages';
 import { motion } from 'framer-motion';
 import type { Frog } from '../utils/supabase';
 
@@ -97,11 +98,11 @@ export default function FrogSelection({ frogs, onSelectFrog, onCreateNew }: Frog
               {/* Logo */}
               <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center mr-3 overflow-hidden border border-gray-100">
                 <img 
-                  src={frog.logo_url} 
+                  src={frog.logo_url || getDefaultImage(frog.name)} 
                   alt={`${frog.name} logo`} 
                   className="w-full h-full object-cover"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = `https://via.placeholder.com/100/00cc88/ffffff?text=${frog.name.charAt(0)}`;
+                    (e.target as HTMLImageElement).src = getDefaultImage(frog.name);
                   }}
                 />
               </div>

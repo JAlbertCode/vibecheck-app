@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import type { Frog } from '../utils/supabase';
-import { createFrogPlaceholder, createLogoPlaceholder } from '../utils/placeholderUtils';
+import { getDefaultImage } from '../utils/defaultImages';
 
 interface FrogCardProps {
   frog: Frog;
@@ -10,26 +10,19 @@ interface FrogCardProps {
 }
 
 export default function FrogCard({ frog, onClick, isSelected = false }: FrogCardProps) {
-  const [frogImageSrc, setFrogImageSrc] = useState<string | null>(null);
-  const [logoImageSrc, setLogoImageSrc] = useState<string | null>(null);
+  // Generate default images on first render
+  const [logoImage, setLogoImage] = useState<string>(frog.logo_url || '');
   
+  // Initialize default images immediately
   useEffect(() => {
-    // Generate placeholder for frog image if needed
-    if (!frog.image_url) {
-      const placeholder = createFrogPlaceholder(frog.name);
-      setFrogImageSrc(placeholder);
-    } else {
-      setFrogImageSrc(frog.image_url);
-    }
-    
-    // Generate placeholder for logo if needed
     if (!frog.logo_url || frog.logo_url.includes('placeholder.com')) {
-      const logoPlaceholder = createLogoPlaceholder(frog.name);
-      setLogoImageSrc(logoPlaceholder);
+      // Run in next tick to ensure client-side execution
+      const img = getDefaultImage(frog.name);
+      setLogoImage(img);
     } else {
-      setLogoImageSrc(frog.logo_url);
+      setLogoImage(frog.logo_url);
     }
-  }, [frog.name, frog.image_url, frog.logo_url]);
+  }, [frog.name, frog.logo_url]);
   return (
     <motion.div
       className={`frog-card p-4 rounded-lg shadow-sm transition-all duration-200 ${isSelected ? 'border-2 border-lily-green bg-green-50' : 'border border-gray-200 hover:border-lily-green hover:shadow-md'}`}
@@ -57,9 +50,13 @@ export default function FrogCard({ frog, onClick, isSelected = false }: FrogCard
           )}
           <div className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-white p-0.5 border border-white shadow-sm">
             <img
-              src={frog.logo_url}
+              src={logoImage}
               alt={`${frog.name} logo`}
               className="w-full h-full object-contain rounded-full"
+              onError={() => {
+                // If image fails to load, use default
+                setLogoImage(getDefaultImage(frog.name));
+              }}
             />
           </div>
         </div>

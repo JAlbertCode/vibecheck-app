@@ -7,6 +7,7 @@ import Header from '../components/Header';
 import { getFrogs, type Frog, type VibeMatch as VibeMatchType } from '../utils/supabase';
 import { compareVibes } from '../utils/lilypad';
 import Link from 'next/link';
+import { getDefaultImage } from '../utils/defaultImages';
 
 export default function Pond() {
   const [frogs, setFrogs] = useState<Frog[]>([]);
@@ -29,6 +30,18 @@ export default function Pond() {
         // For demo purposes, set the first frog as "my frog"
         if (allFrogs.length > 0) {
           setMyFrog(allFrogs[0]);
+        }
+        
+        // Pre-generate all default images in the background
+        if (typeof window !== 'undefined') {
+          setTimeout(() => {
+            allFrogs.forEach(frog => {
+              if (!frog.logo_url || frog.logo_url.includes('placeholder')) {
+                // This will cache the image for later use
+                getDefaultImage(frog.name);
+              }
+            });
+          }, 100); // Small delay to prioritize rendering
         }
       } catch (error) {
         console.error('Error loading frogs:', error);

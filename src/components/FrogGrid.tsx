@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { getDefaultImage } from '../utils/defaultImages';
 import { motion } from 'framer-motion';
 import type { Frog } from '../utils/supabase';
 
@@ -206,27 +207,11 @@ export default function FrogGrid({ frogs, selectedFrog, onSelectFrog, onCompareF
             {/* Logo */}
             <div className="w-full aspect-square bg-gray-50 flex items-center justify-center p-4">
               <img 
-                src={frog.logo_url} 
+                src={frog.logo_url || getDefaultImage(frog.name)} 
                 alt={`${frog.name} logo`} 
                 className="max-w-full max-h-full object-contain"
                 onError={(e) => {
-                  // Create a canvas-based fallback image
-                  const canvas = document.createElement('canvas');
-                  canvas.width = 100;
-                  canvas.height = 100;
-                  const ctx = canvas.getContext('2d');
-                  if (ctx) {
-                    ctx.fillStyle = '#00cc88';
-                    ctx.beginPath();
-                    ctx.arc(50, 50, 50, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.fillStyle = '#ffffff';
-                    ctx.font = 'bold 40px Arial';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(frog.name.charAt(0).toUpperCase(), 50, 50);
-                    (e.target as HTMLImageElement).src = canvas.toDataURL();
-                  }
+                  (e.target as HTMLImageElement).src = getDefaultImage(frog.name);
                 }}
               />
             </div>
