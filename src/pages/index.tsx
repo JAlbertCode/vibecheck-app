@@ -305,15 +305,44 @@ export default function Home() {
         {/* Loading overlay */}
         {(isLoading || isGeneratingImage) && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-lily-green mb-4"></div>
-              <p className="text-pond-dark font-medium">
-                {isGeneratingImage ? 'Generating frog image...' : 'Loading...'}
-              </p>
-              {isGeneratingImage && (
-                <p className="text-sm text-gray-500 mt-2">
-                  This may take a minute as we're using the Lilypad Network.
-                </p>
+            <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center max-w-sm w-full">
+              {isGeneratingImage ? (
+                <>
+                  <div className="mb-4 relative">
+                    <div className="animate-pulse absolute inset-0 bg-lily-green opacity-20 rounded-full"></div>
+                    <div className="w-24 h-24 relative">
+                      <div className="animate-bounce absolute inset-0 flex items-center justify-center">
+                        <span className="text-5xl">🐸</span>
+                      </div>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-2xl animate-ping delay-300">✨</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-pond-dark font-bold text-lg mb-1">Creating your frog...</p>
+                  <p className="text-gray-600 text-center">
+                    Requesting AI magic from the Lilypad Network. This usually takes around 30 seconds.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="mb-4 w-full max-w-xs">
+                    <div className="w-full bg-gray-100 overflow-hidden rounded-full h-4 flex items-center justify-start relative">
+                      <div className="absolute inset-y-0 left-0 bg-lily-green transition-all duration-300 w-1/2 animate-pulse"></div>
+                      <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+                        <div className="animate-marquee whitespace-nowrap flex">
+                          {[...Array(10)].map((_, i) => (
+                            <span key={i} className="mx-2 text-white font-medium text-sm">🐸 ✨ 🌿</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-pond-dark font-bold text-lg mb-1">Computing vibe match...</p>
+                  <p className="text-gray-600 text-center">
+                    Creating your match on the Lilypad Network. Hang tight!
+                  </p>
+                </>
               )}
             </div>
           </div>

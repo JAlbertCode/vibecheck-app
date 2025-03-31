@@ -208,52 +208,105 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
           <p className="text-gray-700">{match.collab_idea || match.possibility_spark}</p>
         </div>
           
-        <div className="mt-3 bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-          <h3 className="text-md font-semibold text-pond-dark flex items-center mb-2">
-            <span className="text-xl mr-2">👋</span>
-            Connect Tip
-          </h3>
-          <p className="text-gray-700">{match.connect_tip || match.first_connect || (match.vibe_path && match.vibe_path[0])}</p>
+        <div className="mt-3 bg-white rounded-xl p-4 shadow-sm border border-gray-100 relative overflow-hidden">
+          {/* Decorative lily pads */}
+          <div className="absolute -bottom-6 -right-6 w-16 h-16 rounded-full bg-lily-green opacity-10"></div>
+          <div className="absolute top-10 right-4 w-3 h-3 rounded-full bg-lily-green opacity-15"></div>
           
-          {/* Contact Info */}
-          <div className="mt-3 flex flex-col sm:flex-row gap-2 sm:gap-4">
-            <div className="flex-1">
-              <h4 className="text-xs font-medium text-gray-500 mb-1">{myFrog.name}</h4>
-              <div className="flex flex-wrap gap-1">
-                {myContactLinks.slice(0, 3).map((link, index) => (
-                  link && (
-                    <a
-                      key={index}
-                      href={link.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center text-xs bg-lily-green bg-opacity-10 hover:bg-opacity-20 px-2 py-1 rounded-full"
-                    >
-                      <span className="mr-1">{link.icon}</span>
-                      <span>{link.label}</span>
-                    </a>
-                  )
+          <h3 className="text-md font-semibold text-pond-dark flex items-center mb-3">
+            <span className="text-xl mr-2">👋</span>
+            <span>Next Step On The Lilypad</span>
+          </h3>
+          
+          <div className="relative bg-pond-light bg-opacity-40 p-3 rounded-lg mb-4">
+            <p className="text-pond-dark italic relative z-10">
+              "{match.connect_tip || match.first_connect || (match.vibe_path && match.vibe_path[0])}"
+            </p>
+            <div className="absolute top-2 left-2 transform -rotate-6 text-2xl opacity-10">“</div>
+            <div className="absolute bottom-2 right-2 transform rotate-6 text-2xl opacity-10">”</div>
+          </div>
+          
+          {/* Path steps - simplified visual */}
+          {match.vibe_path && match.vibe_path.length > 1 && (
+            <div className="mb-4">
+              <h4 className="text-sm font-medium text-pond-dark mb-2">Follow the path:</h4>
+              <div className="flex flex-col gap-2">
+                {match.vibe_path.slice(1, 3).map((step, index) => (
+                  <div key={index} className="flex items-start">
+                    <span className="w-6 h-6 bg-lily-green bg-opacity-10 rounded-full flex items-center justify-center text-lily-green font-medium text-sm mr-2">{index + 2}</span>
+                    <span className="text-sm text-gray-700">{step}</span>
+                  </div>
                 ))}
               </div>
             </div>
-            
-            <div className="flex-1">
-              <h4 className="text-xs font-medium text-gray-500 mb-1">{otherFrog.name}</h4>
-              <div className="flex flex-wrap gap-1">
-                {otherContactLinks.slice(0, 3).map((link, index) => (
-                  link && (
-                    <a
-                      key={index}
-                      href={link.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center text-xs bg-lily-green bg-opacity-10 hover:bg-opacity-20 px-2 py-1 rounded-full"
-                    >
-                      <span className="mr-1">{link.icon}</span>
-                      <span>{link.label}</span>
-                    </a>
-                  )
-                ))}
+          )}
+          
+          {/* Contact Info with better visual */}
+          <div className="mt-4">
+            <h4 className="text-sm font-medium text-pond-dark mb-2">Connect with:</h4>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-6">
+              <div className="flex-1 bg-lily-green bg-opacity-5 p-3 rounded-lg">
+                <h5 className="text-sm font-semibold text-pond-dark mb-2 flex items-center">
+                  <span className="w-5 h-5 rounded-full bg-white overflow-hidden flex items-center justify-center mr-2 shadow-sm">                 
+                    <img 
+                      src={myFrog.logo_url} 
+                      alt=""
+                      className="w-4 h-4 object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = ``;
+                      }}
+                    />
+                  </span>
+                  {myFrog.name}
+                </h5>
+                <div className="flex flex-wrap gap-1">
+                  {myContactLinks.slice(0, 3).map((link, index) => (
+                    link && (
+                      <a
+                        key={index}
+                        href={link.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center text-xs bg-white hover:bg-lily-green hover:text-white px-2 py-1 rounded-full transition-colors"
+                      >
+                        <span className="mr-1">{link.icon}</span>
+                        <span>{link.label}</span>
+                      </a>
+                    )
+                  ))}
+                </div>
+              </div>
+              
+              <div className="flex-1 bg-lily-green bg-opacity-5 p-3 rounded-lg">
+                <h5 className="text-sm font-semibold text-pond-dark mb-2 flex items-center">
+                  <span className="w-5 h-5 rounded-full bg-white overflow-hidden flex items-center justify-center mr-2 shadow-sm">                 
+                    <img 
+                      src={otherFrog.logo_url} 
+                      alt=""
+                      className="w-4 h-4 object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = ``;
+                      }}
+                    />
+                  </span>
+                  {otherFrog.name}
+                </h5>
+                <div className="flex flex-wrap gap-1">
+                  {otherContactLinks.slice(0, 3).map((link, index) => (
+                    link && (
+                      <a
+                        key={index}
+                        href={link.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center text-xs bg-white hover:bg-lily-green hover:text-white px-2 py-1 rounded-full transition-colors"
+                      >
+                        <span className="mr-1">{link.icon}</span>
+                        <span>{link.label}</span>
+                      </a>
+                    )
+                  ))}
+                </div>
               </div>
             </div>
           </div>
