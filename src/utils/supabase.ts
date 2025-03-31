@@ -132,6 +132,27 @@ export async function createFrog(frogData: Omit<Frog, 'id'>): Promise<Frog> {
   return data?.[0] as Frog;
 }
 
+export async function updateFrog(id: string, frogData: Omit<Frog, 'id'>): Promise<Frog> {
+  const updatedFrog = { id, ...frogData };
+  
+  if (isMockMode) {
+    console.log('MOCK MODE: Updating frog in mock data store');
+    mockFrogs = mockFrogs.map(frog => 
+      frog.id === id ? { ...frog, ...frogData } : frog
+    );
+    return updatedFrog as Frog;
+  }
+  
+  const { data, error } = await supabase
+    .from('frogs')
+    .update(frogData)
+    .eq('id', id)
+    .select();
+  
+  if (error) throw error;
+  return data?.[0] as Frog;
+}
+
 export async function updateFrogImage(id: string, imageUrl: string): Promise<void> {
   if (isMockMode) {
     console.log('MOCK MODE: Updating frog image in mock data store');

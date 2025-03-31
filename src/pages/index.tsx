@@ -5,7 +5,7 @@ import FrogSelection from '../components/FrogSelection';
 import FrogGrid from '../components/FrogGrid';
 import VibeMatch from '../components/VibeMatch';
 import Header from '../components/Header';
-import { createFrog, getFrogs, updateFrogImage, getFrogById, type Frog, type VibeMatch as VibeMatchType } from '../utils/supabase';
+import { createFrog, getFrogs, updateFrogImage, updateFrog, getFrogById, type Frog, type VibeMatch as VibeMatchType } from '../utils/supabase';
 import { generateFrogImage, compareVibes } from '../utils/lilypad';
 import { useRouter } from 'next/router';
 
@@ -66,55 +66,79 @@ export default function Home() {
     setIsLoading(true);
     
     try {
-      // Create the frog in Supabase
-      const newFrog = await createFrog({
-        ...frogData,
-        image_url: null
-      });
-      
-      // Ask if user wants to generate image
-      if (confirm('Frog created! Would you like to generate a custom frog image with Lilypad?')) {
-        setIsGeneratingImage(true);
-        try {
-          // Generate image using Lilypad
-          const imageUrl = await generateFrogImage({
-            name: newFrog.name,
-            bio: newFrog.bio,
-            logo_url: newFrog.logo_url,
-            tags: newFrog.tags,
-            reflections: newFrog.reflections,
-            contact_links: newFrog.contact_links
-          });
-          
-          // Update the frog with the image URL
-          await updateFrogImage(newFrog.id, imageUrl);
-          
-          // Refresh the frog data
-          const updatedFrog = await getFrogById(newFrog.id);
-          if (updatedFrog) {
-            // Update frogs list and set as selected
-            setFrogs([...frogs, updatedFrog]);
-            setMyFrog(updatedFrog);
+      // Check if we're editing an existing frog or creating a new one
+      if (editingFrog) {
+        // Update existing frog
+        const imageUrl = editingFrog.image_url || null;
+        const updatedFrog = await updateFrog(editingFrog.id, {
+          ...frogData,
+          image_url: imageUrl
+        });
+        
+        // Update frogs list
+        setFrogs(frogs.map(frog => frog.id === updatedFrog.id ? updatedFrog : frog));
+        
+        // If this was the selected frog, update it
+        if (myFrog && myFrog.id === updatedFrog.id) {
+          setMyFrog(updatedFrog);
+        }
+        
+        // Reset editing state
+        setEditingFrog(null);
+        
+        // Move to browse frogs
+        setCurrentStep('BROWSE_FROGS');
+      } else {
+        // Create a new frog
+        const newFrog = await createFrog({
+          ...frogData,
+          image_url: null
+        });
+        
+        // Ask if user wants to generate image
+        if (confirm('Frog created! Would you like to generate a custom frog image with Lilypad?')) {
+          setIsGeneratingImage(true);
+          try {
+            // Generate image using Lilypad
+            const imageUrl = await generateFrogImage({
+              name: newFrog.name,
+              bio: newFrog.bio,
+              logo_url: newFrog.logo_url,
+              tags: newFrog.tags,
+              reflections: newFrog.reflections,
+              contact_links: newFrog.contact_links
+            });
+            
+            // Update the frog with the image URL
+            await updateFrogImage(newFrog.id, imageUrl);
+            
+            // Refresh the frog data
+            const updatedFrog = await getFrogById(newFrog.id);
+            if (updatedFrog) {
+              // Update frogs list and set as selected
+              setFrogs([...frogs, updatedFrog]);
+              setMyFrog(updatedFrog);
+            }
+          } catch (error) {
+            console.error('Error generating image:', error);
+            // Still set the frog as selected even if image generation fails
+            setFrogs([...frogs, newFrog]);
+            setMyFrog(newFrog);
+          } finally {
+            setIsGeneratingImage(false);
           }
-        } catch (error) {
-          console.error('Error generating image:', error);
-          // Still set the frog as selected even if image generation fails
+        } else {
+          // Just add the new frog to the list and set as selected
           setFrogs([...frogs, newFrog]);
           setMyFrog(newFrog);
-        } finally {
-          setIsGeneratingImage(false);
         }
-      } else {
-        // Just add the new frog to the list and set as selected
-        setFrogs([...frogs, newFrog]);
-        setMyFrog(newFrog);
+        
+        // Move to browse frogs
+        setCurrentStep('BROWSE_FROGS');
       }
-      
-      // Move to browse frogs
-      setCurrentStep('BROWSE_FROGS');
     } catch (error) {
-      console.error('Error creating frog:', error);
-      alert('Failed to create your frog profile. Please try again.');
+      console.error('Error saving frog:', error);
+      alert('Failed to save your frog profile. Please try again.');
     } finally {
       setIsLoading(false);
     }
