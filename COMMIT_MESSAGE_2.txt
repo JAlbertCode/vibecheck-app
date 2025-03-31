@@ -1,0 +1,7 @@
+Fix initialization issues and add mock data for development
+
+- Fixed Supabase initialization with mock implementation
+- Added sample mock frog data for development
+- Implemented mock API responses for Lilypad integration
+- Improved error handling and fallbacks
+- Added _document.tsx for proper HTML setup

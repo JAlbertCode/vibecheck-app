@@ -1,10 +1,12 @@
 import type { Frog, VibeMatch } from './supabase';
 import { DEFAULT_FROG_PROMPT } from './constants';
 
-// Lilypad API endpoints would typically come from environment variables
-// For this demo, we're hardcoding them (but would use .env in production)
-const LILYPAD_API_URL = 'https://anura-testnet.lilypad.tech/api/v1';
-const LILYPAD_API_KEY = 'YOUR_LILYPAD_API_KEY';
+// Lilypad API endpoints from environment variables
+const LILYPAD_API_URL = process.env.NEXT_PUBLIC_LILYPAD_API_URL || 'https://anura-testnet.lilypad.tech/api/v1';
+const LILYPAD_API_KEY = process.env.NEXT_PUBLIC_LILYPAD_API_KEY || 'mock-lilypad-key';
+
+// For demo purposes, we'll mock API calls if no valid API key is provided
+const isMockMode = !process.env.NEXT_PUBLIC_LILYPAD_API_KEY;
 
 /**
  * Generate a frog image based on profile details
@@ -13,6 +15,14 @@ export async function generateFrogImage(frog: Omit<Frog, 'id' | 'image_url'>): P
   try {
     const tagsList = frog.tags.join(', ');
     let prompt = DEFAULT_FROG_PROMPT.replace('{tags}', tagsList);
+    
+    // If in mock mode, return placeholder image
+    if (isMockMode) {
+      console.log('MOCK MODE: Returning placeholder frog image instead of calling Lilypad API');
+      // Create a unique seed based on the frog name to get consistent images for the same frog
+      const nameSeed = frog.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      return `https://via.placeholder.com/500/00cc88/ffffff?text=Generated+Frog+${nameSeed}`;
+    }
     
     // Prepare the payload for Stable Diffusion
     const payload = {
@@ -45,12 +55,12 @@ export async function generateFrogImage(frog: Omit<Frog, 'id' | 'image_url'>): P
     const data = await response.json();
     
     // In a real implementation, we would handle the image data appropriately
-    // For this demo, we'll just return a placeholder URL
+    // For this demo, we'll just return a placeholder URL or the one returned by the API
     // In production, we would upload the image to a storage service and return the URL
-    return data.image_url || "https://via.placeholder.com/500?text=Generated+Frog";
+    return data.image_url || "https://via.placeholder.com/500/00cc88/ffffff?text=Generated+Frog";
   } catch (error) {
     console.error('Error generating frog image:', error);
-    return "https://via.placeholder.com/500?text=Image+Generation+Failed";
+    return "https://via.placeholder.com/500/ff8866/ffffff?text=Image+Generation+Failed";
   }
 }
 
@@ -59,6 +69,48 @@ export async function generateFrogImage(frog: Omit<Frog, 'id' | 'image_url'>): P
  */
 export async function compareVibes(frogA: Frog, frogB: Frog): Promise<VibeMatch> {
   try {
+    // If in mock mode, generate deterministic results based on the frog names
+    if (isMockMode) {
+      console.log('MOCK MODE: Generating mock vibe match instead of calling Lilypad API');
+      
+      // Create a seed from both frog names
+      const nameSeedA = frogA.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const nameSeedB = frogB.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const combinedSeed = (nameSeedA * nameSeedB) % 100;
+      
+      // Generate a match score between 65-95 based on shared tags
+      const sharedTags = frogA.tags.filter(tag => frogB.tags.includes(tag)).length;
+      const baseScore = 65 + (sharedTags * 6);
+      const matchScore = Math.min(95, baseScore);
+      
+      // Generate a deterministic but reasonably unique response
+      const summary = `${frogA.name} and ${frogB.name} share ${sharedTags} interests and have complementary community values!`;
+      
+      // Select possibility spark based on shared tags or default to generic ones
+      let possibilitySpark = "Build a joint community initiative to connect your audiences.";
+      if (frogA.tags.includes('DeFi degen') && frogB.tags.includes('DeFi degen')) {
+        possibilitySpark = "Collaborate on a DeFi educational series for both communities.";
+      } else if (frogA.tags.includes('Artist-led') || frogB.tags.includes('Artist-led')) {
+        possibilitySpark = "Create a collaborative NFT collection featuring artists from both communities.";
+      } else if (frogA.tags.includes('Builder-centric') || frogB.tags.includes('Builder-centric')) {
+        possibilitySpark = "Launch a joint hackathon to build tools that benefit both communities.";
+      }
+      
+      // Generate vibe path steps
+      const vibePath = [
+        "Set up an initial Discord call to get to know each other's communities.",
+        "Identify specific members who would be good points of contact for the collaboration.",
+        "Create a shared document outlining goals and next steps for the partnership."
+      ];
+      
+      return {
+        match_score: matchScore,
+        summary,
+        possibility_spark: possibilitySpark,
+        vibe_path: vibePath
+      };
+    }
+    
     // Prepare the payload for the LLM
     const payload = {
       model: "phi4:14b",
