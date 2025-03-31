@@ -14,12 +14,13 @@ export default function FrogForm({ onSubmit }: FrogFormProps) {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [secretSauce, setSecretSauce] = useState('');
+  const [otherLinks, setOtherLinks] = useState('');
   const [twitterHandle, setTwitterHandle] = useState('');
+  const [linkedinHandle, setLinkedinHandle] = useState('');
   const [contactLinks, setContactLinks] = useState<Record<string, string>>({
     twitter: '',
     site: '',
-    email: '',
-    farcaster: ''
+    linkedin: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -35,6 +36,14 @@ export default function FrogForm({ onSubmit }: FrogFormProps) {
     // Strip @ if user entered it
     const handle = e.target.value.replace('@', '');
     setTwitterHandle(handle);
+  };
+  
+  const handleLinkedinHandleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLinkedinHandle(e.target.value);
+  };
+  
+  const handleOtherLinksChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setOtherLinks(e.target.value);
   };
 
   const handleContactLinkChange = (key: string, value: string) => {
@@ -80,6 +89,23 @@ export default function FrogForm({ onSubmit }: FrogFormProps) {
       handleContactLinkChange('twitter', twitterHandle);
     }
     
+    // Update LinkedIn handle if provided
+    if (linkedinHandle && !contactLinks.linkedin) {
+      handleContactLinkChange('linkedin', linkedinHandle.includes('linkedin.com') ? 
+        linkedinHandle : `https://linkedin.com/company/${linkedinHandle}`);
+    }
+    
+    // Update other links if provided
+    if (otherLinks) {
+      // Split by line breaks and add each link to contactLinks
+      const links = otherLinks.split('\n').filter(link => link.trim());
+      links.forEach((link, index) => {
+        if (link.trim()) {
+          handleContactLinkChange(`other_${index}`, link.trim());
+        }
+      });
+    }
+    
     // Default logo URL if none provided
     const finalLogoUrl = logoUrl || `https://via.placeholder.com/100/00cc88/ffffff?text=${name.charAt(0)}`;
     
@@ -102,12 +128,13 @@ export default function FrogForm({ onSubmit }: FrogFormProps) {
       setLogoFile(null);
       setSelectedTags([]);
       setSecretSauce('');
+      setLinkedinHandle('');
+      setOtherLinks('');
       setTwitterHandle('');
       setContactLinks({
         twitter: '',
         site: '',
-        email: '',
-        farcaster: ''
+        linkedin: ''
       });
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -125,7 +152,8 @@ export default function FrogForm({ onSubmit }: FrogFormProps) {
       className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-lg"
     >
       <h2 className="text-2xl font-bold text-pond-dark mb-2">Create Your Vibe Profile</h2>
-      <p className="text-gray-500 mb-6">Tell us about your community's vibe so we can match you with others! 🐸</p>
+      <p className="text-gray-500 mb-6">Tell us about your community's vibe so we can match you with others! 🐸<br/>
+        <span className="text-xs">Anyone can edit profiles - this is like a Wiki for Web3 communities.</span></p>
       
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Community Info */}
@@ -258,6 +286,20 @@ export default function FrogForm({ onSubmit }: FrogFormProps) {
             </div>
             
             <div>
+              <label htmlFor="contactLinkedin" className="flex items-center text-xs text-gray-500 mb-1">
+                <span className="mr-1">💼</span> LinkedIn
+              </label>
+              <input
+                type="text"
+                id="contactLinkedin"
+                value={linkedinHandle}
+                onChange={handleLinkedinHandleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-lily-green focus:border-lily-green"
+                placeholder="company/your-company"
+              />
+            </div>
+            
+            <div>
               <label htmlFor="website" className="flex items-center text-xs text-gray-500 mb-1">
                 <span className="mr-1">🌐</span> Website
               </label>
@@ -268,6 +310,20 @@ export default function FrogForm({ onSubmit }: FrogFormProps) {
                 onChange={(e) => handleContactLinkChange('site', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-lily-green focus:border-lily-green"
                 placeholder="https://..."
+              />
+            </div>
+            
+            <div className="md:col-span-2">
+              <label htmlFor="otherLinks" className="flex items-center text-xs text-gray-500 mb-1">
+                <span className="mr-1">🔗</span> Other links (one per line)
+              </label>
+              <textarea
+                id="otherLinks"
+                value={otherLinks}
+                onChange={handleOtherLinksChange}
+                rows={2}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-lily-green focus:border-lily-green"
+                placeholder="https://github.com/your-org&#10;https://discord.gg/your-server"
               />
             </div>
           </div>

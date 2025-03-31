@@ -46,12 +46,13 @@ export interface VibeMatch {
   match_score: number;
   vibe_phrase?: string;
   collab_idea?: string;
-  hang_spots?: string;
-  first_connect?: string;
+  connect_tip?: string;
   // Support for legacy fields
   summary?: string;
   possibility_spark?: string;
   vibe_path?: string[];
+  hang_spots?: string;
+  first_connect?: string;
 }
 
 // Check if we're in mock mode

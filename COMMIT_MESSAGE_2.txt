@@ -1,7 +1,12 @@
-Fix initialization issues and add mock data for development
+feat: More focus on company collaboration & better sharing
 
-- Fixed Supabase initialization with mock implementation
-- Added sample mock frog data for development
-- Implemented mock API responses for Lilypad integration
-- Improved error handling and fallbacks
-- Added _document.tsx for proper HTML setup
+- Redesigned card to prominently show both company logos side by side
+- Changed LLM prompt to focus on specific, practical collaborations between companies
+- Improved Twitter sharing with shorter, more engaging tweet text
+- Added LinkedIn as a primary contact method alongside Twitter
+- Fixed image sharing issues with html2canvas by adding better rendering options
+- Positioned as a "wiki for Web3 communities" with editable profiles
+- Better display of mutual shared tags between communities
+- Renamed "hang spots" to "connect tip" for more practical collaboration advice
+- Added support for showing both companies' contact information on the match card
+- Improved card styling for better visual separation and readability
