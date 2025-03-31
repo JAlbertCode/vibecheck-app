@@ -42,10 +42,13 @@ export default function FrogCard({ frog, onClick, isSelected = false }: FrogCard
         
         <div className="flex-1 min-w-0">
           <h3 className="text-lg font-medium text-pond-dark truncate">{frog.name}</h3>
-          <p className="text-sm text-gray-500 truncate">
-            {frog.tags.slice(0, 3).join(', ')}
-            {frog.tags.length > 3 && '...'}
-          </p>
+          <div className="flex flex-wrap gap-1 mt-1">
+            {frog.tags.map((tag, index) => (
+              <span key={index} className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">
+                {tag}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
       
@@ -62,6 +65,15 @@ export default function FrogCard({ frog, onClick, isSelected = false }: FrogCard
         ) : (
           <span className="text-gray-400 text-xs">Click to select</span>
         )}
+        <button 
+          onClick={(e) => {
+            e.stopPropagation();
+            window.dispatchEvent(new CustomEvent('view-frog-details', { detail: frog }));
+          }}
+          className="text-xs py-1 px-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition-colors"
+        >
+          View Details
+        </button>
       </div>
     </motion.div>
   );

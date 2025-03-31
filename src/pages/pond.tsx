@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import FrogCard from '../components/FrogCard';
+import FrogDetails from '../components/FrogDetails';
 import VibeMatch from '../components/VibeMatch';
 import Header from '../components/Header';
 import { getFrogs, type Frog, type VibeMatch as VibeMatchType } from '../utils/supabase';
@@ -14,6 +15,10 @@ export default function Pond() {
   const [selectedFrog, setSelectedFrog] = useState<Frog | null>(null);
   const [compareLoading, setCompareLoading] = useState(false);
   const [match, setMatch] = useState<VibeMatchType | null>(null);
+  
+  // State for the details modal
+  const [detailsFrog, setDetailsFrog] = useState<Frog | null>(null);
+  const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
     const loadFrogs = async () => {
@@ -36,6 +41,19 @@ export default function Pond() {
     };
     
     loadFrogs();
+    
+    // Set up event listener for viewing frog details
+    const handleViewDetails = (event: Event) => {
+      const customEvent = event as CustomEvent<Frog>;
+      setDetailsFrog(customEvent.detail);
+      setShowDetails(true);
+    };
+    
+    window.addEventListener('view-frog-details', handleViewDetails);
+    
+    return () => {
+      window.removeEventListener('view-frog-details', handleViewDetails);
+    };
   }, []);
   
   // This ensures we don't show the same frog twice
@@ -76,6 +94,13 @@ export default function Pond() {
   return (
     <div className="min-h-screen bg-pond-light pb-12">
       <Header />
+      
+      {/* Details Modal */}
+      <FrogDetails
+        isOpen={showDetails}
+        onClose={() => setShowDetails(false)}
+        frog={detailsFrog}
+      />
       <div className="container mx-auto px-4">
         <div className="mb-12 text-center">
           <h1 className="text-4xl font-bold text-pond-dark mb-4">The Pond</h1>

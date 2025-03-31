@@ -319,6 +319,29 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
           </div>
           
           <div className="space-y-4">
+            {reflections.length < 2 && (
+              <div className="bg-gray-50 p-3 rounded-lg mb-3">
+                <h4 className="text-sm font-medium mb-2">Choose reflection questions:</h4>
+                <div className="space-y-2">
+                  {reflectionQuestions.map((question, i) => (
+                    <div
+                      key={i}
+                      className="p-2 rounded border border-gray-200 hover:border-lily-green cursor-pointer transition-colors"
+                      onClick={() => {
+                        const updatedQuestions = [...selectedQuestions];
+                        updatedQuestions[0] = i;
+                        setSelectedQuestions(updatedQuestions);
+                      }}
+                    >
+                      <p className={`text-sm ${selectedQuestions[0] === i ? 'font-semibold text-lily-green' : 'text-gray-700'}`}>
+                        {selectedQuestions[0] === i && '✓ '}{question}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
             {reflections.map((reflection, index) => (
               <div key={index} className="bg-gray-50 p-3 rounded-lg">
                 <div className="flex justify-between mb-2">
