@@ -5,7 +5,7 @@ import type { Frog } from '../utils/supabase';
 
 interface FrogFormProps {
   onSubmit: (frogData: Omit<Frog, 'id' | 'image_url'>) => Promise<void>;
-  initialData?: Frog;
+  initialData?: Frog | null;
 }
 
 export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
@@ -14,16 +14,86 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
   const [logoUrl, setLogoUrl] = useState(initialData?.logo_url || '');
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>(initialData?.tags || []);
-  const [secretSauce, setSecretSauce] = useState(initialData?.reflections?.[0] || '');
-  const [otherLinks, setOtherLinks] = useState('');
-  const [twitterHandle, setTwitterHandle] = useState(initialData?.contact_links?.twitter ? initialData.contact_links.twitter.replace('https://twitter.com/', '') : '');
-  const [linkedinHandle, setLinkedinHandle] = useState(initialData?.contact_links?.linkedin || '');
-  const [contactLinks, setContactLinks] = useState<Record<string, string>>(initialData?.contact_links || {
-    twitter: '',
-    site: '',
-    linkedin: '',
-  });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Vibe Questions (for more thoughtful matching)
+  const reflectionQuestions = [
+    "What kind of thing would your community love to co-create?",
+    "What types of vibes don't mix well with yours?",
+    "What makes you feel connected to another community?"
+  ];
+  
+  // Set initial reflections from existing data
+  const [reflections, setReflections] = useState<string[]>(
+    initialData?.reflections && initialData.reflections.length > 0 
+      ? initialData.reflections
+      : ['']
+  );
+  
+  // Selected reflection questions
+  const [selectedQuestions, setSelectedQuestions] = useState<number[]>(
+    reflections.map((_, index) => index % reflectionQuestions.length)
+  );
+
+  // Social links
+  const [otherLinks, setOtherLinks] = useState('');
+  const [twitterHandle, setTwitterHandle] = useState(
+    initialData?.contact_links?.twitter 
+      ? initialData.contact_links.twitter.replace('https://twitter.com/', '') 
+      : ''
+  );
+  const [linkedinHandle, setLinkedinHandle] = useState(initialData?.contact_links?.linkedin || '');
+  const [contactLinks, setContactLinks] = useState<Record<string, string>>(
+    initialData?.contact_links || {
+      twitter: '',
+      site: '',
+      linkedin: ''
+    }
+  );
+
+  // Add a new reflection with a random question
+  const addReflection = () => {
+    if (reflections.length < 3) {
+      // Choose a random question that hasn't been selected yet
+      const availableQuestions = reflectionQuestions
+        .map((_, index) => index)
+        .filter(index => !selectedQuestions.includes(index));
+      
+      const newQuestionIndex = availableQuestions.length > 0
+        ? availableQuestions[Math.floor(Math.random() * availableQuestions.length)]
+        : Math.floor(Math.random() * reflectionQuestions.length);
+      
+      setReflections([...reflections, '']);
+      setSelectedQuestions([...selectedQuestions, newQuestionIndex]);
+    }
+  };
+  
+  // Update a reflection at a specific index
+  const updateReflection = (index: number, value: string) => {
+    const updatedReflections = [...reflections];
+    updatedReflections[index] = value;
+    setReflections(updatedReflections);
+  };
+  
+  // Remove a reflection at a specific index
+  const removeReflection = (index: number) => {
+    if (reflections.length > 1) {
+      const updatedReflections = [...reflections];
+      updatedReflections.splice(index, 1);
+      setReflections(updatedReflections);
+      
+      const updatedQuestions = [...selectedQuestions];
+      updatedQuestions.splice(index, 1);
+      setSelectedQuestions(updatedQuestions);
+    }
+  };
+  
+  // Change the question for a specific reflection
+  const changeQuestion = (index: number) => {
+    const updatedQuestions = [...selectedQuestions];
+    updatedQuestions[index] = (updatedQuestions[index] + 1) % reflectionQuestions.length;
+    setSelectedQuestions(updatedQuestions);
+  };
 
   const handleTagToggle = (tag: string) => {
     if (selectedTags.includes(tag)) {
@@ -32,7 +102,7 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
       setSelectedTags([...selectedTags, tag]);
     }
   };
-
+  
   const handleTwitterHandleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Strip @ if user entered it
     const handle = e.target.value.replace('@', '');
@@ -42,7 +112,7 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
   const handleLinkedinHandleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLinkedinHandle(e.target.value);
   };
-  
+
   const handleOtherLinksChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setOtherLinks(e.target.value);
   };
@@ -80,8 +150,8 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
     if (isSubmitting) return;
     
     // Validation
-    if (!name || !bio || selectedTags.length === 0 || !secretSauce) {
-      alert('Please fill out all required fields (Community Name, Bio, Vibe Tags, and Secret Sauce)');
+    if (!name || !bio || selectedTags.length === 0 || reflections.some(r => !r.trim())) {
+      alert('Please fill out all required fields (Community Name, Bio, Vibe Tags, and Reflection Questions)');
       return;
     }
     
@@ -118,7 +188,7 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
         bio,
         logo_url: finalLogoUrl,
         tags: selectedTags,
-        reflections: [secretSauce],
+        reflections: reflections.filter(r => r.trim()),
         contact_links: contactLinks
       });
       
@@ -128,7 +198,8 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
       setLogoUrl('');
       setLogoFile(null);
       setSelectedTags([]);
-      setSecretSauce('');
+      setReflections(['']);
+      setSelectedQuestions([0]);
       setLinkedinHandle('');
       setOtherLinks('');
       setTwitterHandle('');
@@ -204,25 +275,6 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
           )}
         </div>
         
-        {/* Twitter Handle (for easier vibe sourcing) */}
-        <div>
-          <label htmlFor="twitter" className="block text-sm font-medium text-gray-700 mb-1">
-            Twitter Handle (Optional)
-          </label>
-          <div className="flex items-center">
-            <span className="text-gray-500 mr-2">@</span>
-            <input
-              type="text"
-              id="twitter"
-              value={twitterHandle}
-              onChange={handleTwitterHandleChange}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-lily-green focus:border-lily-green"
-              placeholder="your_community"
-            />
-          </div>
-          <p className="text-xs text-gray-500 mt-1">We'll use this to help understand your vibe</p>
-        </div>
-        
         {/* Vibe Tags */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -249,40 +301,93 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
           </div>
         </div>
         
-        {/* Secret Sauce Question */}
+        {/* Reflection Questions */}
         <div>
-          <label htmlFor="secretSauce" className="block text-sm font-medium text-gray-700 mb-1">
-            What's your community's secret sauce? <span className="text-red-500">*</span>
-          </label>
-          <textarea
-            id="secretSauce"
-            value={secretSauce}
-            onChange={(e) => setSecretSauce(e.target.value)}
-            rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-lily-green focus:border-lily-green"
-            placeholder="Tell us what makes your community special..."
-            required
-          />
-          <p className="text-xs text-gray-500 mt-1">This helps us match you with communities that complement your vibe</p>
+          <div className="flex justify-between items-center mb-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Reflection Questions <span className="text-red-500">*</span>
+            </label>
+            {reflections.length < 3 && (
+              <button
+                type="button"
+                onClick={addReflection}
+                className="text-sm text-lily-green hover:underline flex items-center"
+              >
+                <span className="mr-1">+</span> Add Question
+              </button>
+            )}
+          </div>
+          
+          <div className="space-y-4">
+            {reflections.map((reflection, index) => (
+              <div key={index} className="bg-gray-50 p-3 rounded-lg">
+                <div className="flex justify-between mb-2">
+                  <button
+                    type="button"
+                    onClick={() => changeQuestion(index)}
+                    className="text-sm text-lily-green hover:underline flex items-center"
+                  >
+                    <span className="mr-1">🔄</span> {reflectionQuestions[selectedQuestions[index]]}
+                  </button>
+                  
+                  {reflections.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeReflection(index)}
+                      className="text-sm text-red-500 hover:underline"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+                
+                <textarea
+                  value={reflection}
+                  onChange={(e) => updateReflection(index, e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-lily-green focus:border-lily-green"
+                  placeholder="Share your thoughts..."
+                  required
+                />
+              </div>
+            ))}
+          </div>
         </div>
         
-        {/* Contact Links */}
+        {/* Contact Links - All in one section */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             How can others reach you?
           </label>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
             <div>
               <label htmlFor="contactTwitter" className="flex items-center text-xs text-gray-500 mb-1">
                 <span className="mr-1">🐦</span> Twitter
               </label>
+              <div className="flex items-center">
+                <span className="text-gray-500 mr-2">@</span>
+                <input
+                  type="text"
+                  id="contactTwitter"
+                  value={twitterHandle}
+                  onChange={handleTwitterHandleChange}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-lily-green focus:border-lily-green"
+                  placeholder="your_community"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <label htmlFor="website" className="flex items-center text-xs text-gray-500 mb-1">
+                <span className="mr-1">🌐</span> Website
+              </label>
               <input
-                type="text"
-                id="contactTwitter"
-                value={contactLinks.twitter}
-                onChange={(e) => handleContactLinkChange('twitter', e.target.value)}
+                type="url"
+                id="website"
+                value={contactLinks.site}
+                onChange={(e) => handleContactLinkChange('site', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-lily-green focus:border-lily-green"
-                placeholder="@your_community"
+                placeholder="https://..."
               />
             </div>
             
@@ -301,20 +406,6 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
             </div>
             
             <div>
-              <label htmlFor="website" className="flex items-center text-xs text-gray-500 mb-1">
-                <span className="mr-1">🌐</span> Website
-              </label>
-              <input
-                type="url"
-                id="website"
-                value={contactLinks.site}
-                onChange={(e) => handleContactLinkChange('site', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-lily-green focus:border-lily-green"
-                placeholder="https://..."
-              />
-            </div>
-            
-            <div className="md:col-span-2">
               <label htmlFor="otherLinks" className="flex items-center text-xs text-gray-500 mb-1">
                 <span className="mr-1">🔗</span> Other links (one per line)
               </label>
@@ -331,7 +422,15 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
         </div>
         
         {/* Submit Button */}
-        <div className="flex justify-end">
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => window.history.back()}
+            className="px-4 py-2 text-gray-600 hover:text-lily-green transition-colors"
+          >
+            ← Back
+          </button>
+          
           <motion.button
             type="submit"
             className="px-6 py-3 bg-lily-green text-white font-medium rounded-md shadow-lg hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lily-green disabled:opacity-50 flex items-center"

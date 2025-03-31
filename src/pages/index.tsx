@@ -351,7 +351,7 @@ export default function Home() {
                       </div>
                     </div>
                   </div>
-                  <p className="text-pond-dark font-bold text-lg mb-1">Creating your frog...</p>
+                  <p className="text-pond-dark font-bold text-lg mb-1">Creating your frog image...</p>
                   <p className="text-gray-600 text-center">
                     Requesting AI magic from the Lilypad Network. This usually takes around 30 seconds.
                   </p>
