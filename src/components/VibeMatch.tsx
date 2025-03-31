@@ -34,8 +34,22 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
     if (!matchCardRef.current) return;
     
     try {
-      // Add a class to the card before capturing to ensure proper styles
+      // Prepare for capture by ensuring stable dimensions and styles
       matchCardRef.current.classList.add('capturing-card');
+      
+      // Fix: Create a style tag to prevent content shifts during capture
+      const styleTag = document.createElement('style');
+      styleTag.innerHTML = `
+        .capturing-card a {
+          display: inline-block;
+          position: relative;
+          transform: translateY(0);
+        }
+        .capturing-card * {
+          transform: translateZ(0);
+        }
+      `;
+      document.head.appendChild(styleTag);
       
       const options = {
         backgroundColor: null,
@@ -50,8 +64,9 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
       
       const canvas = await html2canvas(matchCardRef.current, options);
       
-      // Remove the class after capturing
+      // Remove the class and style tag after capturing
       matchCardRef.current.classList.remove('capturing-card');
+      document.head.removeChild(styleTag);
       
       const image = canvas.toDataURL('image/png');
       
@@ -69,8 +84,22 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
     if (!matchCardRef.current) return;
     
     try {
-      // Add a class to the card before capturing to ensure proper styles
+      // Prepare for capture by ensuring stable dimensions and styles
       matchCardRef.current.classList.add('capturing-card');
+      
+      // Fix: Create a style tag to prevent content shifts during capture
+      const styleTag = document.createElement('style');
+      styleTag.innerHTML = `
+        .capturing-card a {
+          display: inline-block;
+          position: relative;
+          transform: translateY(0);
+        }
+        .capturing-card * {
+          transform: translateZ(0);
+        }
+      `;
+      document.head.appendChild(styleTag);
       
       const options = {
         backgroundColor: null,
@@ -84,8 +113,9 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
       
       const canvas = await html2canvas(matchCardRef.current, options);
       
-      // Remove the class after capturing
+      // Remove the class and style tag after capturing
       matchCardRef.current.classList.remove('capturing-card');
+      document.head.removeChild(styleTag);
       
       canvas.toBlob(async (blob) => {
         if (!blob) return;

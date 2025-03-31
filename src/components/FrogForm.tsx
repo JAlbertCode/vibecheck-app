@@ -5,19 +5,20 @@ import type { Frog } from '../utils/supabase';
 
 interface FrogFormProps {
   onSubmit: (frogData: Omit<Frog, 'id' | 'image_url'>) => Promise<void>;
+  initialData?: Frog;
 }
 
-export default function FrogForm({ onSubmit }: FrogFormProps) {
-  const [name, setName] = useState('');
-  const [bio, setBio] = useState('');
-  const [logoUrl, setLogoUrl] = useState('');
+export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
+  const [name, setName] = useState(initialData?.name || '');
+  const [bio, setBio] = useState(initialData?.bio || '');
+  const [logoUrl, setLogoUrl] = useState(initialData?.logo_url || '');
   const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [secretSauce, setSecretSauce] = useState('');
+  const [selectedTags, setSelectedTags] = useState<string[]>(initialData?.tags || []);
+  const [secretSauce, setSecretSauce] = useState(initialData?.reflections?.[0] || '');
   const [otherLinks, setOtherLinks] = useState('');
-  const [twitterHandle, setTwitterHandle] = useState('');
-  const [linkedinHandle, setLinkedinHandle] = useState('');
-  const [contactLinks, setContactLinks] = useState<Record<string, string>>({
+  const [twitterHandle, setTwitterHandle] = useState(initialData?.contact_links?.twitter ? initialData.contact_links.twitter.replace('https://twitter.com/', '') : '');
+  const [linkedinHandle, setLinkedinHandle] = useState(initialData?.contact_links?.linkedin || '');
+  const [contactLinks, setContactLinks] = useState<Record<string, string>>(initialData?.contact_links || {
     twitter: '',
     site: '',
     linkedin: '',
@@ -151,7 +152,7 @@ export default function FrogForm({ onSubmit }: FrogFormProps) {
       transition={{ duration: 0.5 }}
       className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-lg"
     >
-      <h2 className="text-2xl font-bold text-pond-dark mb-2">Create Your Vibe Profile</h2>
+      <h2 className="text-2xl font-bold mb-2">{initialData ? 'Edit Community Profile' : 'Create Your Vibe Profile'}</h2>
       <p className="text-gray-500 mb-6">Tell us about your community's vibe so we can match you with others! 🐸<br/>
         <span className="text-xs">Anyone can edit profiles - this is like a Wiki for Web3 communities.</span></p>
       
@@ -338,8 +339,8 @@ export default function FrogForm({ onSubmit }: FrogFormProps) {
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.98 }}
           >
-            <span className="mr-2">{isSubmitting ? '🐸 Creating...' : '🐸 Create Your Frog'}</span>
-            {!isSubmitting && <span className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded">Ribbit!</span>}
+            <span className="mr-2">{isSubmitting ? '⏳ Saving...' : initialData ? '💾 Save Changes' : '✨ Create Community'}</span>
+            {!isSubmitting && <span className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded">{initialData ? 'Update' : 'Create'}</span>}
           </motion.button>
         </div>
       </form>

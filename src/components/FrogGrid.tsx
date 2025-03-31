@@ -15,7 +15,7 @@ export default function FrogGrid({ frogs, selectedFrog, onSelectFrog, onCompareF
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedFrogs, setSelectedFrogs] = useState<Frog[]>([]);
   
-  // Get all unique tags from all frogs
+  // Get all unique tags from all communities
   const allTags = Array.from(
     new Set(
       frogs.flatMap(frog => frog.tags)
@@ -46,20 +46,6 @@ export default function FrogGrid({ frogs, selectedFrog, onSelectFrog, onCompareF
       setSelectedTags(selectedTags.filter(t => t !== tag));
     } else {
       setSelectedTags([...selectedTags, tag]);
-    }
-  };
-
-  const handleFrogToggle = (frog: Frog) => {
-    if (selectedFrogs.some(f => f.id === frog.id)) {
-      setSelectedFrogs(selectedFrogs.filter(f => f.id !== frog.id));
-    } else {
-      setSelectedFrogs([...selectedFrogs, frog]);
-    }
-  };
-
-  const handleCompareClick = () => {
-    if (selectedFrogs.length > 0) {
-      onCompareFrogs(selectedFrogs);
     }
   };
 
@@ -127,96 +113,93 @@ export default function FrogGrid({ frogs, selectedFrog, onSelectFrog, onCompareF
         )}
       </div>
       
-      {/* Selection info and compare button - always visible */}
-      <div className="sticky top-0 z-10 bg-white mb-4 p-4 rounded-lg shadow border border-gray-100 transition-all">
+      {/* Section title */}
+      <div className="mb-4 bg-white p-4 rounded-lg shadow border border-gray-100">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h3 className="font-medium text-pond-dark text-lg mb-1">Select communities to compare</h3>
+            <h3 className="font-medium text-lg mb-1">Find your vibe match</h3>
             <p className="text-sm text-gray-600">
-              {selectedFrogs.length === 0 
-                ? "Click on communities to select them" 
-                : `${selectedFrogs.length} ${selectedFrogs.length === 1 ? 'community' : 'communities'} selected`}
+              {selectedFrogs.length === 0
+                ? "Click on a community card to see your vibe match"
+                : "Click additional cards to select multiple, then compare"
+              }
             </p>
           </div>
-          
-          <motion.button
-            onClick={handleCompareClick}
-            disabled={selectedFrogs.length === 0}
-            className={`px-6 py-3 text-white font-medium rounded-full shadow focus:outline-none relative overflow-hidden ${selectedFrogs.length === 0 ? 'bg-gray-300 cursor-not-allowed' : 'bg-lily-green hover:bg-opacity-90'}`}
-            whileHover={selectedFrogs.length > 0 ? { scale: 1.03 } : undefined}
-            whileTap={selectedFrogs.length > 0 ? { scale: 0.98 } : undefined}
+          <button
+            onClick={() => {
+              if (selectedFrogs.length === 0) {
+                // Start multi-select mode by selecting one random frog
+                if (filteredFrogs.length > 0) {
+                  setSelectedFrogs([filteredFrogs[0]]);
+                }
+              } else {
+                // Exit multi-select mode
+                setSelectedFrogs([]);
+              }
+            }}
+            className="text-sm text-lily-green hover:underline"
           >
-            {selectedFrogs.length > 0 && (
-              <span className="absolute top-0 right-0 w-5 h-5 bg-white text-lily-green rounded-full flex items-center justify-center text-xs font-bold transform translate-x-1/4 -translate-y-1/4">
-                {selectedFrogs.length}
-              </span>
-            )}
-            
-            <span className="flex items-center gap-2">
-              <span>Get Vibe Match</span>
-              <span>✨</span>
-            </span>
-          </motion.button>
+            {selectedFrogs.length === 0 ? "Select multiple" : "Cancel"}
+          </button>
         </div>
-        
-        {/* Selected communities chips */}
-        {selectedFrogs.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-2">
-            {selectedFrogs.map(frog => (
-              <div key={frog.id} className="bg-lily-green bg-opacity-10 text-pond-dark text-sm px-3 py-1 rounded-full flex items-center gap-1">
-                <span>{frog.name}</span>
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleFrogToggle(frog);
-                  }}
-                  className="hover:bg-lily-green hover:bg-opacity-20 rounded-full w-4 h-4 flex items-center justify-center"
-                >
-                  ×
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
+      
+      {/* Multi-selection controls */}
+      {selectedFrogs.length > 0 && (
+        <div className="mb-4 p-3 bg-lily-light rounded-lg border border-lily-green">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center">
+              <span className="mr-2 font-medium">{selectedFrogs.length} selected</span>
+              <button 
+                onClick={() => setSelectedFrogs([])} 
+                className="text-sm text-lily-green hover:underline"
+              >
+                Clear
+              </button>
+            </div>
+            <button
+              className="px-4 py-1 bg-lily-green text-white rounded-full text-sm font-medium hover:bg-opacity-90 transition-colors"
+              onClick={() => onCompareFrogs(selectedFrogs)}
+            >
+              Compare Selected
+            </button>
+          </div>
+        </div>
+      )}
       
       {/* Communities grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {filteredFrogs.map(frog => (
           <motion.div
             key={frog.id}
-            className={`relative bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 hover:shadow-md hover:border-lily-green transition-all cursor-pointer ${
-              selectedFrogs.some(f => f.id === frog.id) ? 'ring-2 ring-lily-green' : ''
-            }`}
+            className={`relative bg-white rounded-lg shadow-sm overflow-hidden border ${selectedFrogs.includes(frog) ? 'border-lily-green ring-2 ring-lily-green' : 'border-gray-200'} hover:shadow-md hover:border-lily-green transition-all cursor-pointer`}
             whileHover={{ y: -5 }}
-            onClick={(e) => {
-              // Only select the frog when clicking, don't immediately compare
-              handleFrogToggle(frog);
+            onClick={() => {
+              // If already selected, remove from selection
+              if (selectedFrogs.includes(frog)) {
+                setSelectedFrogs(selectedFrogs.filter(f => f.id !== frog.id));
+              } 
+              // If it's the first selection, add to selection
+              else if (selectedFrogs.length > 0) {
+                setSelectedFrogs([...selectedFrogs, frog]);
+              }
+              // If no current selection, just select this frog directly
+              else {
+                onSelectFrog(frog);
+              }
             }}
           >
-            {/* Checkbox for multi-select */}
-            <div 
-              className={`absolute top-2 right-2 z-10 w-6 h-6 rounded-md border-2 ${selectedFrogs.some(f => f.id === frog.id) ? 'bg-lily-green border-lily-green' : 'bg-white border-gray-300 hover:border-lily-green'} shadow-sm flex items-center justify-center cursor-pointer transition-colors duration-200`}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleFrogToggle(frog);
-              }}
-            >
-              {selectedFrogs.some(f => f.id === frog.id) ? (
-                <span className="text-white text-sm font-bold">✓</span>
-              ) : null}
-            </div>
             
             {/* Edit button */}
             {onEditFrog && (
               <div 
-                className="absolute top-2 left-2 z-10 w-6 h-6 rounded-md border-2 border-gray-300 bg-white hover:border-lily-green shadow-sm flex items-center justify-center cursor-pointer transition-colors duration-200"
+                className="absolute top-2 right-2 z-10 w-8 h-8 rounded-md border-2 border-gray-300 bg-white hover:border-lily-green shadow-sm flex items-center justify-center cursor-pointer transition-colors duration-200"
                 onClick={(e) => {
                   e.stopPropagation();
                   onEditFrog(frog);
                 }}
               >
-                <span className="text-gray-500 hover:text-lily-green">✎</span>
+                <span className="text-gray-500 hover:text-lily-green text-lg">✎</span>
               </div>
             )}
             
@@ -250,7 +233,7 @@ export default function FrogGrid({ frogs, selectedFrog, onSelectFrog, onCompareF
             
             {/* Info */}
             <div className="p-3">
-              <h3 className="font-medium text-pond-dark truncate">{frog.name}</h3>
+              <h3 className="font-medium truncate">{frog.name}</h3>
               <div className="mt-1 flex flex-wrap gap-1">
                 {frog.tags.slice(0, 3).map((tag, index) => (
                   <span key={index} className="inline-block text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full truncate max-w-full">

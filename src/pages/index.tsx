@@ -1,8 +1,4 @@
-  // Handle editing a frog
-  const handleEditFrog = (frog: Frog) => {
-    setEditingFrog(frog);
-    setCurrentStep('CREATE_FROG');
-  };import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import FrogForm from '../components/FrogForm';
 import FrogSelection from '../components/FrogSelection';
@@ -162,6 +158,12 @@ export default function Home() {
     alert('Comparing multiple frogs is coming soon!');
   };
   
+  // Handle editing a frog
+  const handleEditFrog = (frog: Frog) => {
+    setEditingFrog(frog);
+    setCurrentStep('CREATE_FROG');
+  };
+  
   // Handle going back to browse frogs from match screen
   const handleBackToBrowse = () => {
     setCurrentStep('BROWSE_FROGS');
@@ -189,7 +191,7 @@ export default function Home() {
         
       case 'CREATE_FROG':
         return (
-          <FrogForm onSubmit={handleFormSubmit} />
+          <FrogForm onSubmit={handleFormSubmit} initialData={editingFrog} />
         );
         
       case 'BROWSE_FROGS':
@@ -203,16 +205,32 @@ export default function Home() {
                     alt={`${myFrog.name} logo`} 
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = `https://via.placeholder.com/100/00cc88/ffffff?text=${myFrog.name.charAt(0)}`;
+                      // Create a canvas-based fallback image
+                      const canvas = document.createElement('canvas');
+                      canvas.width = 100;
+                      canvas.height = 100;
+                      const ctx = canvas.getContext('2d');
+                      if (ctx) {
+                        ctx.fillStyle = '#00cc88';
+                        ctx.beginPath();
+                        ctx.arc(50, 50, 50, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = '#ffffff';
+                        ctx.font = 'bold 40px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(myFrog.name.charAt(0).toUpperCase(), 50, 50);
+                        (e.target as HTMLImageElement).src = canvas.toDataURL();
+                      }
                     }}
                   />
                 </div>
                 
                 <div className="flex-1">
-                  <h2 className="text-xl font-bold text-pond-dark">{myFrog.name}</h2>
+                  <h2 className="text-xl font-bold">{myFrog.name}</h2>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {myFrog.tags.slice(0, 3).map((tag, index) => (
-                      <span key={index} className="text-xs bg-pond-light text-pond-dark px-2 py-0.5 rounded-full">
+                      <span key={index} className="text-xs bg-gray-100 px-2 py-0.5 rounded-full">
                         {tag}
                       </span>
                     ))}
@@ -222,12 +240,20 @@ export default function Home() {
                   </div>
                 </div>
                 
-                <button
-                  onClick={handleChangeFrog}
-                  className="text-lily-green hover:underline text-sm font-medium"
-                >
-                  Change
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleEditFrog(myFrog)}
+                    className="text-lily-green hover:underline text-sm font-medium"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={handleChangeFrog}
+                    className="text-lily-green hover:underline text-sm font-medium"
+                  >
+                    Change
+                  </button>
+                </div>
               </div>
             )}
             
@@ -240,6 +266,7 @@ export default function Home() {
                 selectedFrog={myFrog}
                 onSelectFrog={handleSelectCompareFrog}
                 onCompareFrogs={handleCompareMultiple}
+                onEditFrog={handleEditFrog}
               />
             </div>
           </div>
@@ -287,12 +314,12 @@ export default function Home() {
         {(currentStep === 'SELECT_FROG' || currentStep === 'CREATE_FROG') && (
           <div className="mb-12 text-center">
             <motion.h1 
-              className="text-4xl font-bold text-pond-dark mb-4"
+              className="text-4xl font-bold mb-4"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              {currentStep === 'CREATE_FROG' ? 'Create Your Vibe Profile' : 'Select Your Community'}
+              {currentStep === 'CREATE_FROG' ? (editingFrog ? 'Edit Community Profile' : 'Create Your Vibe Profile') : 'Select Your Community'}
             </motion.h1>
             <motion.p 
               className="text-xl text-gray-600 max-w-2xl mx-auto"

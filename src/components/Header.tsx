@@ -24,15 +24,9 @@ export default function Header() {
         <nav className="flex space-x-6">
           <Link 
             href="/" 
-            className={`${currentPath === '/' ? 'text-lily-green font-medium' : 'text-white hover:text-lily-green'} transition-colors`}
+            className="text-white hover:text-lily-green transition-colors"
           >
-            Create Frog
-          </Link>
-          <Link 
-            href="/pond" 
-            className={`${currentPath === '/pond' ? 'text-lily-green font-medium' : 'text-white hover:text-lily-green'} transition-colors`}
-          >
-            The Pond
+            VibeCheck
           </Link>
         </nav>
       </div>
