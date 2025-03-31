@@ -1,4 +1,8 @@
-import React, { useState, useEffect } from 'react';
+  // Handle editing a frog
+  const handleEditFrog = (frog: Frog) => {
+    setEditingFrog(frog);
+    setCurrentStep('CREATE_FROG');
+  };import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import FrogForm from '../components/FrogForm';
 import FrogSelection from '../components/FrogSelection';
@@ -29,6 +33,7 @@ export default function Home() {
   // UI state
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [editingFrog, setEditingFrog] = useState<Frog | null>(null); // For edit functionality
   
   const router = useRouter();
   

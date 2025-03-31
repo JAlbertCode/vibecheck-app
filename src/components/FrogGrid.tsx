@@ -7,9 +7,10 @@ interface FrogGridProps {
   selectedFrog?: Frog | null;
   onSelectFrog: (frog: Frog) => void;
   onCompareFrogs: (frogs: Frog[]) => void;
+  onEditFrog?: (frog: Frog) => void;
 }
 
-export default function FrogGrid({ frogs, selectedFrog, onSelectFrog, onCompareFrogs }: FrogGridProps) {
+export default function FrogGrid({ frogs, selectedFrog, onSelectFrog, onCompareFrogs, onEditFrog }: FrogGridProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedFrogs, setSelectedFrogs] = useState<Frog[]>([]);
@@ -69,7 +70,7 @@ export default function FrogGrid({ frogs, selectedFrog, onSelectFrog, onCompareF
         <div className="relative">
           <input
             type="text"
-            placeholder="Search frogs..."
+            placeholder="Search communities..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-lily-green focus:border-transparent pl-10"
@@ -108,7 +109,7 @@ export default function FrogGrid({ frogs, selectedFrog, onSelectFrog, onCompareF
                   }
                 }}
               >
-                <option value="">Filter by tags...</option>
+                <option value="">Filter by vibes...</option>
                 {allTags
                   .filter(tag => !selectedTags.includes(tag))
                   .map(tag => (
@@ -133,7 +134,7 @@ export default function FrogGrid({ frogs, selectedFrog, onSelectFrog, onCompareF
             <h3 className="font-medium text-pond-dark text-lg mb-1">Select communities to compare</h3>
             <p className="text-sm text-gray-600">
               {selectedFrogs.length === 0 
-                ? "Click the checkboxes to select communities" 
+                ? "Click on communities to select them" 
                 : `${selectedFrogs.length} ${selectedFrogs.length === 1 ? 'community' : 'communities'} selected`}
             </p>
           </div>
@@ -179,7 +180,7 @@ export default function FrogGrid({ frogs, selectedFrog, onSelectFrog, onCompareF
         )}
       </div>
       
-      {/* Frogs grid */}
+      {/* Communities grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {filteredFrogs.map(frog => (
           <motion.div
@@ -188,7 +189,10 @@ export default function FrogGrid({ frogs, selectedFrog, onSelectFrog, onCompareF
               selectedFrogs.some(f => f.id === frog.id) ? 'ring-2 ring-lily-green' : ''
             }`}
             whileHover={{ y: -5 }}
-            onClick={() => onSelectFrog(frog)}
+            onClick={(e) => {
+              // Only select the frog when clicking, don't immediately compare
+              handleFrogToggle(frog);
+            }}
           >
             {/* Checkbox for multi-select */}
             <div 
@@ -202,6 +206,19 @@ export default function FrogGrid({ frogs, selectedFrog, onSelectFrog, onCompareF
                 <span className="text-white text-sm font-bold">✓</span>
               ) : null}
             </div>
+            
+            {/* Edit button */}
+            {onEditFrog && (
+              <div 
+                className="absolute top-2 left-2 z-10 w-6 h-6 rounded-md border-2 border-gray-300 bg-white hover:border-lily-green shadow-sm flex items-center justify-center cursor-pointer transition-colors duration-200"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEditFrog(frog);
+                }}
+              >
+                <span className="text-gray-500 hover:text-lily-green">✎</span>
+              </div>
+            )}
             
             {/* Logo */}
             <div className="w-full aspect-square bg-gray-50 flex items-center justify-center p-4">
@@ -252,7 +269,7 @@ export default function FrogGrid({ frogs, selectedFrog, onSelectFrog, onCompareF
       {/* Empty state */}
       {filteredFrogs.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-500">No frogs found matching your filters.</p>
+          <p className="text-gray-500">No communities found matching your filters.</p>
           {(searchQuery || selectedTags.length > 0) && (
             <button
               onClick={() => {

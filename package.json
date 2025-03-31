@@ -10,12 +10,16 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
-    "framer-motion": "^10.16.5",
+    "framer-motion": "^10.18.0",
     "html2canvas": "^1.4.1",
     "next": "^14.0.3",
     "react": "^18.2.0",
+    "react-confetti": "^6.4.0",
     "react-dom": "^18.2.0",
-    "uuid": "^9.0.1"
+    "react-spring": "^9.7.5",
+    "tone": "^15.0.4",
+    "uuid": "^9.0.1",
+    "wavesurfer.js": "^7.9.4"
   },
   "devDependencies": {
     "@types/node": "^20.9.4",
