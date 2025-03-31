@@ -173,26 +173,37 @@ export async function compareVibes(frogA: Frog, frogB: Frog): Promise<VibeMatch>
       // Calculate final match score (0-100)
       const rawScore = tagSimilarity + bioSimilarity + reflectionSimilarity + combinedSeed;
       
-      // Ensure score is within reasonable range (50-95) - most communities should have some compatibility
-      const matchScore = Math.max(50, Math.min(95, rawScore));
+      // Ensure score is within a wider range (40-90) - allows for more variety in match scores
+      const matchScore = Math.max(40, Math.min(90, rawScore));
       
-      console.log(`Match details: Tags ${tagSimilarity}/40, Bio ${bioSimilarity}/20, Reflections ${reflectionSimilarity}/30, Random ${combinedSeed}/10, Total ${matchScore}/100`);
+      // Apply a more aggressive bell curve distribution to make extreme scores much less common
+      // This will make high matches truly special and meaningful
+      const normalizedScore = Math.round(
+        40 + (matchScore - 40) * Math.pow((matchScore - 40) / 50, 0.5)
+      );
       
-      // Use the match score to influence vibe phrase
+      // Apply a cap to ensure more variety (max 85% for most matches)
+      const cappedScore = Math.min(normalizedScore, intersection.size > 3 ? 85 : 75);
+      
+      console.log(`Match details: Tags ${tagSimilarity}/40, Bio ${bioSimilarity}/20, Reflections ${reflectionSimilarity}/30, Random ${combinedSeed}/10, Raw ${matchScore}/100, Normalized ${normalizedScore}/100, Capped ${cappedScore}/100`);
+      
+      // Use the capped score to influence vibe phrase
       let vibe_phrase = '';
-      if (matchScore >= 85) {
+      if (cappedScore >= 85) {
         vibe_phrase = `${frogA.name} + ${frogB.name} = Dream team match! ⭐`;
-      } else if (matchScore >= 75) {
+      } else if (cappedScore >= 75) {
         vibe_phrase = `Great potential between ${frogA.name} & ${frogB.name} 🚀`;
-      } else if (matchScore >= 65) {
+      } else if (cappedScore >= 65) {
         vibe_phrase = `Interesting synergy between these communities 💡`;
-      } else {
+      } else if (cappedScore >= 55) {
         vibe_phrase = `Some common ground to build on 🌱`;
+      } else {
+        vibe_phrase = `Different paths, potential for growth 🌿`;
       }
       
-      // Select collab idea based on shared tags and score
+      // Select collab idea based on shared tags and capped score
       let collab_idea = '';
-      if (matchScore >= 80) {
+      if (cappedScore >= 80) {
         if (frogA.tags.some(t => t.toLowerCase().includes('defi')) && frogB.tags.some(t => t.toLowerCase().includes('defi'))) {
           collab_idea = "Co-develop a new DeFi protocol combining both communities' expertise.";
         } else if (frogA.tags.some(t => t.toLowerCase().includes('artist')) || frogB.tags.some(t => t.toLowerCase().includes('artist'))) {
@@ -202,7 +213,7 @@ export async function compareVibes(frogA: Frog, frogB: Frog): Promise<VibeMatch>
         } else {
           collab_idea = "Run a high-impact event series co-branded by both communities.";
         }
-      } else if (matchScore >= 65) {
+      } else if (cappedScore >= 65) {
         if (intersection.size > 0) {
           // Use their actual common interests
           const commonInterests = Array.from(intersection).join(', ');
@@ -214,18 +225,18 @@ export async function compareVibes(frogA: Frog, frogB: Frog): Promise<VibeMatch>
         collab_idea = "Start with a community exchange program to learn from each other.";
       }
       
-      // Generate connect tip based on score
+      // Generate connect tip based on capped score
       let connect_tip = '';
-      if (matchScore >= 80) {
+      if (cappedScore >= 80) {
         connect_tip = "Schedule a leadership call to map out collaboration possibilities.";
-      } else if (matchScore >= 65) {
+      } else if (cappedScore >= 65) {
         connect_tip = "DM each other to arrange a casual intro call between community leads.";
       } else {
         connect_tip = "Connect on Twitter and start by engaging with each other's content.";
       }
       
       return {
-        match_score: matchScore,
+        match_score: cappedScore,
         vibe_phrase,
         collab_idea,
         connect_tip
