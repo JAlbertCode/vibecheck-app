@@ -425,10 +425,10 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
         <div className="flex items-center justify-between">
           <button
             type="button"
-            onClick={() => window.history.back()}
+            onClick={() => window.location.href = '/'}
             className="px-4 py-2 text-gray-600 hover:text-lily-green transition-colors"
           >
-            ← Back
+            ← Back to Pond
           </button>
           
           <motion.button

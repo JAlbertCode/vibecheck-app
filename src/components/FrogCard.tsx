@@ -11,7 +11,7 @@ interface FrogCardProps {
 export default function FrogCard({ frog, onClick, isSelected = false }: FrogCardProps) {
   return (
     <motion.div
-      className={`frog-card p-4 ${isSelected ? 'border-2 border-lily-green' : 'border border-gray-200'}`}
+      className={`frog-card p-4 rounded-lg shadow-sm transition-all duration-200 ${isSelected ? 'border-2 border-lily-green bg-green-50' : 'border border-gray-200 hover:border-lily-green hover:shadow-md'}`}
       whileHover={{ y: -5 }}
       onClick={onClick}
     >
@@ -51,9 +51,18 @@ export default function FrogCard({ frog, onClick, isSelected = false }: FrogCard
       
       <p className="mt-2 text-sm text-gray-600 line-clamp-2">{frog.bio}</p>
       
-      {isSelected && (
-        <div className="mt-2 text-lily-green text-sm font-medium">Selected</div>
-      )}
+      <div className="mt-2 text-sm font-medium flex items-center justify-between">
+        {isSelected ? (
+          <span className="text-lily-green flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+            Selected
+          </span>
+        ) : (
+          <span className="text-gray-400 text-xs">Click to select</span>
+        )}
+      </div>
     </motion.div>
   );
 }

@@ -45,8 +45,14 @@ export default function Pond() {
     // Don't allow selecting your own frog
     if (myFrog && frog.id === myFrog.id) return;
     
-    setSelectedFrog(frog);
-    setMatch(null);
+    // If the same frog is clicked again, deselect it
+    if (selectedFrog && frog.id === selectedFrog.id) {
+      setSelectedFrog(null);
+    } else {
+      // Otherwise, select the clicked frog
+      setSelectedFrog(frog);
+      setMatch(null);
+    }
   };
 
   const handleCompare = async () => {
@@ -74,7 +80,7 @@ export default function Pond() {
         <div className="mb-12 text-center">
           <h1 className="text-4xl font-bold text-pond-dark mb-4">The Pond</h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Browse other frogs, select one to compare with yours, and discover your vibe match!
+          Browse other communities, <span className="underline">select one</span> to compare with yours, then <span className="font-semibold text-lily-green">check your vibes!</span>
           </p>
         </div>
         
@@ -97,29 +103,27 @@ export default function Pond() {
                 >
                   <FrogCard frog={myFrog} onClick={() => {}} />
                   
-                  {selectedFrog && (
-                    <motion.button
+                  <motion.button
                     onClick={handleCompare}
-                    className="mt-6 w-full px-4 py-2 bg-lily-green text-white font-medium rounded-md shadow-sm hover:bg-opacity-90 focus:outline-none disabled:opacity-50 relative"
-                    disabled={compareLoading}
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.98 }}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    >
+                    className={`mt-6 w-full px-4 py-2 ${selectedFrog ? 'bg-lily-green text-white' : 'bg-gray-200 text-gray-500'} font-medium rounded-md shadow-sm hover:bg-opacity-90 focus:outline-none disabled:opacity-50 relative ${!selectedFrog ? 'cursor-not-allowed' : ''}`}
+                    disabled={compareLoading || !selectedFrog}
+                    whileHover={{ scale: selectedFrog ? 1.03 : 1 }}
+                    whileTap={{ scale: selectedFrog ? 0.98 : 1 }}
+                  >
                     {compareLoading ? (
-                        <span className="flex items-center justify-center">
+                      <span className="flex items-center justify-center">
                         <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
                         Checking Vibes...
                       </span>
-                    ) : (
+                    ) : selectedFrog ? (
                       'Check Vibes!'
+                    ) : (
+                      'Select a community first'
                     )}
                   </motion.button>
-                  )}
                 </motion.div>
               ) : (
                 <div className="bg-white p-6 rounded-xl shadow-lg text-center">
@@ -136,7 +140,8 @@ export default function Pond() {
             
             {/* Other Frogs Section */}
             <div>
-              <h2 className="text-xl font-semibold text-pond-dark mb-4">Other Frogs</h2>
+              <h2 className="text-xl font-semibold text-pond-dark mb-4">Other Communities</h2>
+              <p className="text-gray-500 text-sm mb-4">Click on a community to select it, then check your vibes using the button to the left.</p>
               
               {otherFrogs.length === 0 ? (
                 <div className="bg-white p-6 rounded-xl shadow-lg text-center">
