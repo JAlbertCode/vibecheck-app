@@ -34,15 +34,25 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
     if (!matchCardRef.current) return;
     
     try {
+      // Add a class to the card before capturing to ensure proper styles
+      matchCardRef.current.classList.add('capturing-card');
+      
       const options = {
         backgroundColor: null,
         useCORS: true,
-        allowTaint: true, 
+        allowTaint: true,
         scale: 2, // Higher quality
-        logging: true
+        logging: false,
+        // Force a specific size to ensure consistency
+        width: matchCardRef.current.offsetWidth,
+        height: matchCardRef.current.offsetHeight
       };
       
       const canvas = await html2canvas(matchCardRef.current, options);
+      
+      // Remove the class after capturing
+      matchCardRef.current.classList.remove('capturing-card');
+      
       const image = canvas.toDataURL('image/png');
       
       const anchor = document.createElement('a');
@@ -59,14 +69,24 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
     if (!matchCardRef.current) return;
     
     try {
+      // Add a class to the card before capturing to ensure proper styles
+      matchCardRef.current.classList.add('capturing-card');
+      
       const options = {
         backgroundColor: null,
         useCORS: true, 
         allowTaint: true,
-        scale: 2 // Higher quality
+        scale: 2, // Higher quality
+        width: matchCardRef.current.offsetWidth,
+        height: matchCardRef.current.offsetHeight,
+        logging: false
       };
       
       const canvas = await html2canvas(matchCardRef.current, options);
+      
+      // Remove the class after capturing
+      matchCardRef.current.classList.remove('capturing-card');
+      
       canvas.toBlob(async (blob) => {
         if (!blob) return;
         
@@ -141,6 +161,7 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
       <div 
         ref={matchCardRef} 
         className="bg-gradient-to-br from-white to-pond-light p-6 rounded-2xl shadow-lg border-2 border-lily-green overflow-hidden relative max-w-xl mx-auto"
+        style={{ width: '100%', maxWidth: '600px', minHeight: '550px' }}
       >
         {/* Decorative elements */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
@@ -159,7 +180,23 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
                 alt={`${myFrog.name} logo`} 
                 className="object-contain w-full h-full"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = `https://via.placeholder.com/100/00cc88/ffffff?text=${myFrog.name.charAt(0)}`;
+                  // Create a canvas-based fallback image
+                  const canvas = document.createElement('canvas');
+                  canvas.width = 100;
+                  canvas.height = 100;
+                  const ctx = canvas.getContext('2d');
+                  if (ctx) {
+                    ctx.fillStyle = '#00cc88';
+                    ctx.beginPath();
+                    ctx.arc(50, 50, 50, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 40px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(myFrog.name.charAt(0).toUpperCase(), 50, 50);
+                    (e.target as HTMLImageElement).src = canvas.toDataURL();
+                  }
                 }}
               />
             </div>
@@ -175,7 +212,23 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
                 alt={`${otherFrog.name} logo`} 
                 className="object-contain w-full h-full"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = `https://via.placeholder.com/100/00cc88/ffffff?text=${otherFrog.name.charAt(0)}`;
+                  // Create a canvas-based fallback image
+                  const canvas = document.createElement('canvas');
+                  canvas.width = 100;
+                  canvas.height = 100;
+                  const ctx = canvas.getContext('2d');
+                  if (ctx) {
+                    ctx.fillStyle = '#00cc88';
+                    ctx.beginPath();
+                    ctx.arc(50, 50, 50, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 40px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(otherFrog.name.charAt(0).toUpperCase(), 50, 50);
+                    (e.target as HTMLImageElement).src = canvas.toDataURL();
+                  }
                 }}
               />
             </div>
@@ -253,7 +306,23 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
                       alt=""
                       className="w-4 h-4 object-cover"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = ``;
+                        // Create a canvas-based fallback image
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 100;
+                        canvas.height = 100;
+                        const ctx = canvas.getContext('2d');
+                        if (ctx) {
+                          ctx.fillStyle = '#00cc88';
+                          ctx.beginPath();
+                          ctx.arc(50, 50, 50, 0, Math.PI * 2);
+                          ctx.fill();
+                          ctx.fillStyle = '#ffffff';
+                          ctx.font = 'bold 40px Arial';
+                          ctx.textAlign = 'center';
+                          ctx.textBaseline = 'middle';
+                          ctx.fillText(myFrog.name.charAt(0).toUpperCase(), 50, 50);
+                          (e.target as HTMLImageElement).src = canvas.toDataURL();
+                        }
                       }}
                     />
                   </span>
@@ -285,7 +354,23 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
                       alt=""
                       className="w-4 h-4 object-cover"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = ``;
+                        // Create a canvas-based fallback image
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 100;
+                        canvas.height = 100;
+                        const ctx = canvas.getContext('2d');
+                        if (ctx) {
+                          ctx.fillStyle = '#00cc88';
+                          ctx.beginPath();
+                          ctx.arc(50, 50, 50, 0, Math.PI * 2);
+                          ctx.fill();
+                          ctx.fillStyle = '#ffffff';
+                          ctx.font = 'bold 40px Arial';
+                          ctx.textAlign = 'center';
+                          ctx.textBaseline = 'middle';
+                          ctx.fillText(otherFrog.name.charAt(0).toUpperCase(), 50, 50);
+                          (e.target as HTMLImageElement).src = canvas.toDataURL();
+                        }
                       }}
                     />
                   </span>
@@ -322,10 +407,10 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
       </div>
       
       {/* Share buttons */}
-      <div className="mt-4 flex justify-center space-x-4">
+      <div className="mt-6 flex justify-center space-x-4">
         <motion.button
           onClick={handleDownload}
-          className="px-4 py-2 bg-lily-green text-white font-medium rounded-full shadow hover:bg-opacity-90 focus:outline-none flex items-center space-x-2"
+          className="px-4 py-2 bg-lily-green text-white font-medium rounded-full shadow hover:bg-opacity-90 focus:outline-none flex items-center space-x-2 min-w-[120px] justify-center"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -334,7 +419,7 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
         
         <motion.button
           onClick={handleCopyToClipboard}
-          className="px-4 py-2 bg-pond-dark text-white font-medium rounded-full shadow hover:bg-opacity-90 focus:outline-none flex items-center space-x-2"
+          className="px-4 py-2 bg-pond-dark text-white font-medium rounded-full shadow hover:bg-opacity-90 focus:outline-none flex items-center space-x-2 min-w-[120px] justify-center"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -343,7 +428,7 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
         
         <motion.button
           onClick={handleShareOnTwitter}
-          className="px-4 py-2 bg-blue-400 text-white font-medium rounded-full shadow hover:bg-opacity-90 focus:outline-none flex items-center space-x-2"
+          className="px-4 py-2 bg-blue-400 text-white font-medium rounded-full shadow hover:bg-opacity-90 focus:outline-none flex items-center space-x-2 min-w-[120px] justify-center"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >

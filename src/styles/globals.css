@@ -73,3 +73,21 @@ body {
     opacity: 0.7;
   }
 }
+
+/* Class for fixing html2canvas rendering issues */
+.capturing-card {
+  position: relative !important;
+  transform: none !important;
+  /* Force all child elements to fully render */
+  transform-style: flat !important;
+  /* Ensure proper text placement */
+  text-align: left !important;
+  /* Prevent any animations during capture */
+  animation: none !important;
+}
+
+.capturing-card * {
+  animation: none !important;
+  transform: none !important;
+  transition: none !important;
+}
