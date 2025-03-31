@@ -21,8 +21,42 @@ export default function FrogSelection({ frogs, onSelectFrog, onCreateNew }: Frog
   return (
     <div className="max-w-3xl mx-auto">
       <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-pond-dark">Select your community</h2>
-        <p className="text-gray-500 mt-1">Choose your community or create a new one</p>
+        <h2 className="text-2xl font-bold text-pond-dark mb-2">Select your community</h2>
+      </div>
+      
+      <div className="mb-8 bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+        <h3 className="font-bold text-lg mb-4">Why create a community profile?</h3>
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1 flex items-start space-x-2">
+            <div className="bg-lily-green bg-opacity-10 w-8 h-8 rounded-full flex items-center justify-center text-lg shrink-0">
+              👥
+            </div>
+            <div>
+              <h4 className="font-medium mb-1">Discover partners</h4>
+              <p className="text-sm text-gray-600">Find communities that share your values for meaningful collaborations.</p>
+            </div>
+          </div>
+          
+          <div className="flex-1 flex items-start space-x-2">
+            <div className="bg-lily-green bg-opacity-10 w-8 h-8 rounded-full flex items-center justify-center text-lg shrink-0">
+              💼
+            </div>
+            <div>
+              <h4 className="font-medium mb-1">Build your network</h4>
+              <p className="text-sm text-gray-600">Connect with complementary projects and expand your ecosystem.</p>
+            </div>
+          </div>
+          
+          <div className="flex-1 flex items-start space-x-2">
+            <div className="bg-lily-green bg-opacity-10 w-8 h-8 rounded-full flex items-center justify-center text-lg shrink-0">
+              💻
+            </div>
+            <div>
+              <h4 className="font-medium mb-1">Powered by AI</h4>
+              <p className="text-sm text-gray-600">Get smart match suggestions using Lilypad's decentralized AI network.</p>
+            </div>
+          </div>
+        </div>
       </div>
       
       <div className="flex items-center gap-4 mb-8">

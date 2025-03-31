@@ -84,8 +84,10 @@ export default function FrogDetails({ isOpen, onClose, frog }: FrogDetailsProps)
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full bg-lily-green flex items-center justify-center text-white text-4xl font-bold">
-                      {frog.name.charAt(0)}
+                    <div className="w-full h-full bg-gradient-to-br from-lily-green to-blue-400 flex items-center justify-center text-white text-4xl font-bold">
+                      <span className="text-4xl">
+                        {["🐸", "🦋", "🪷", "🌿", "✨", "🌊", "🧩", "🎮", "🚀", "🔮", "🧠", "🎨", "🔧", "🌱", "🧪", "💫", "🪄", "🧬", "🪴", "🐙", "🦄", "🦎", "🐝", "🐬", "🐢", "🦚"][frog.name.charCodeAt(0) % 26]}
+                      </span>
                     </div>
                   )}
                 </div>

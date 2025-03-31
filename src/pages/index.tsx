@@ -282,8 +282,7 @@ export default function Home() {
             )}
             
             <div>
-              <h2 className="text-xl font-bold text-pond-dark mb-2">Find communities to collaborate with</h2>
-              <p className="text-gray-600 mb-4">Select a community to see how you could work together</p>
+              <h2 className="text-xl font-bold text-pond-dark mb-4">Find communities to collaborate with</h2>
               
               <FrogGrid 
                 frogs={frogs}
@@ -343,7 +342,7 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              {currentStep === 'CREATE_FROG' ? (editingFrog ? 'Edit Community Profile' : 'Create Your Vibe Profile') : 'Select Your Community'}
+              {currentStep === 'CREATE_FROG' ? (editingFrog ? 'Edit Community Profile' : 'Create Your Community') : 'VibeCheck'}
             </motion.h1>
             <motion.p 
               className="text-xl text-gray-600 max-w-2xl mx-auto"
@@ -353,7 +352,7 @@ export default function Home() {
             >
               {currentStep === 'CREATE_FROG' 
                 ? 'Create your community profile, match with others, and discover collaboration possibilities.' 
-                : 'Choose your community or create a new one to start exploring collaborations.'}
+                : null}
             </motion.p>
           </div>
         )}

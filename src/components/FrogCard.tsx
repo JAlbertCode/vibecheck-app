@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import type { Frog } from '../utils/supabase';
+import { createFrogPlaceholder, createLogoPlaceholder } from '../utils/placeholderUtils';
 
 interface FrogCardProps {
   frog: Frog;
@@ -9,6 +10,26 @@ interface FrogCardProps {
 }
 
 export default function FrogCard({ frog, onClick, isSelected = false }: FrogCardProps) {
+  const [frogImageSrc, setFrogImageSrc] = useState<string | null>(null);
+  const [logoImageSrc, setLogoImageSrc] = useState<string | null>(null);
+  
+  useEffect(() => {
+    // Generate placeholder for frog image if needed
+    if (!frog.image_url) {
+      const placeholder = createFrogPlaceholder(frog.name);
+      setFrogImageSrc(placeholder);
+    } else {
+      setFrogImageSrc(frog.image_url);
+    }
+    
+    // Generate placeholder for logo if needed
+    if (!frog.logo_url || frog.logo_url.includes('placeholder.com')) {
+      const logoPlaceholder = createLogoPlaceholder(frog.name);
+      setLogoImageSrc(logoPlaceholder);
+    } else {
+      setLogoImageSrc(frog.logo_url);
+    }
+  }, [frog.name, frog.image_url, frog.logo_url]);
   return (
     <motion.div
       className={`frog-card p-4 rounded-lg shadow-sm transition-all duration-200 ${isSelected ? 'border-2 border-lily-green bg-green-50' : 'border border-gray-200 hover:border-lily-green hover:shadow-md'}`}
@@ -27,8 +48,11 @@ export default function FrogCard({ frog, onClick, isSelected = false }: FrogCard
               />
             </div>
           ) : (
-            <div className="flex items-center justify-center w-full h-full bg-lily-green text-white text-xl font-bold">
-              {frog.name.charAt(0)}
+            <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-lily-green to-blue-400 text-white text-xl font-bold overflow-hidden">
+              {/* Use emoji based on first letter of name */}
+              <span className="text-3xl">
+                {["🐸", "🦋", "🪷", "🌿", "✨", "🌊", "🧩", "🎮", "🚀", "🔮", "🧠", "🎨", "🔧", "🌱", "🧪", "💫", "🪄", "🧬", "🪴", "🐙", "🦄", "🦎", "🐝", "🐬", "🐢", "🦚"][frog.name.charCodeAt(0) % 26]}
+              </span>
             </div>
           )}
           <div className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-white p-0.5 border border-white shadow-sm">
