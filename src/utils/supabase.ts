@@ -44,9 +44,14 @@ export interface Frog {
 
 export interface VibeMatch {
   match_score: number;
-  summary: string;
-  possibility_spark: string;
-  vibe_path: string[];
+  vibe_phrase?: string;
+  collab_idea?: string;
+  hang_spots?: string;
+  first_connect?: string;
+  // Support for legacy fields
+  summary?: string;
+  possibility_spark?: string;
+  vibe_path?: string[];
 }
 
 // Check if we're in mock mode

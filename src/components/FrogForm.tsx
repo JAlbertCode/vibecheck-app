@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { VIBE_TAGS, REFLECTION_PROMPTS } from '../utils/constants';
+import { VIBE_TAGS } from '../utils/constants';
 import type { Frog } from '../utils/supabase';
 
 interface FrogFormProps {
@@ -13,8 +13,8 @@ export default function FrogForm({ onSubmit }: FrogFormProps) {
   const [logoUrl, setLogoUrl] = useState('');
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [selectedPrompts, setSelectedPrompts] = useState<string[]>([]);
-  const [reflections, setReflections] = useState<Record<string, string>>({});
+  const [secretSauce, setSecretSauce] = useState('');
+  const [twitterHandle, setTwitterHandle] = useState('');
   const [contactLinks, setContactLinks] = useState<Record<string, string>>({
     twitter: '',
     site: '',
@@ -31,22 +31,20 @@ export default function FrogForm({ onSubmit }: FrogFormProps) {
     }
   };
 
-  const handlePromptToggle = (prompt: string) => {
-    if (selectedPrompts.includes(prompt)) {
-      setSelectedPrompts(selectedPrompts.filter(p => p !== prompt));
-      const newReflections = { ...reflections };
-      delete newReflections[prompt];
-      setReflections(newReflections);
-    } else if (selectedPrompts.length < 2) {
-      setSelectedPrompts([...selectedPrompts, prompt]);
-    }
-  };
-
-  const handleReflectionChange = (prompt: string, value: string) => {
-    setReflections({ ...reflections, [prompt]: value });
+  const handleTwitterHandleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Strip @ if user entered it
+    const handle = e.target.value.replace('@', '');
+    setTwitterHandle(handle);
   };
 
   const handleContactLinkChange = (key: string, value: string) => {
+    // For Twitter, automatically format the URL if they just entered the handle
+    if (key === 'twitter' && value && !value.includes('http')) {
+      // Strip @ if included
+      const handle = value.replace('@', '');
+      value = `https://twitter.com/${handle}`;
+    }
+    
     setContactLinks({ ...contactLinks, [key]: value });
   };
 
@@ -72,9 +70,14 @@ export default function FrogForm({ onSubmit }: FrogFormProps) {
     if (isSubmitting) return;
     
     // Validation
-    if (!name || !bio || selectedTags.length === 0 || selectedPrompts.length !== 2) {
-      alert('Please fill out all required fields (Community Name, Bio, 5 Vibe Tags, and 2 Reflection Questions)');
+    if (!name || !bio || selectedTags.length === 0 || !secretSauce) {
+      alert('Please fill out all required fields (Community Name, Bio, Vibe Tags, and Secret Sauce)');
       return;
+    }
+    
+    // Update Twitter handle if provided
+    if (twitterHandle && !contactLinks.twitter) {
+      handleContactLinkChange('twitter', twitterHandle);
     }
     
     // Default logo URL if none provided
@@ -83,14 +86,12 @@ export default function FrogForm({ onSubmit }: FrogFormProps) {
     setIsSubmitting(true);
     
     try {
-      const reflectionArray = selectedPrompts.map(prompt => reflections[prompt] || '');
-      
       await onSubmit({
         name,
         bio,
         logo_url: finalLogoUrl,
         tags: selectedTags,
-        reflections: reflectionArray,
+        reflections: [secretSauce],
         contact_links: contactLinks
       });
       
@@ -100,8 +101,8 @@ export default function FrogForm({ onSubmit }: FrogFormProps) {
       setLogoUrl('');
       setLogoFile(null);
       setSelectedTags([]);
-      setSelectedPrompts([]);
-      setReflections({});
+      setSecretSauce('');
+      setTwitterHandle('');
       setContactLinks({
         twitter: '',
         site: '',
@@ -123,7 +124,8 @@ export default function FrogForm({ onSubmit }: FrogFormProps) {
       transition={{ duration: 0.5 }}
       className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-lg"
     >
-      <h2 className="text-2xl font-bold text-pond-dark mb-6">Create Your Vibe Profile</h2>
+      <h2 className="text-2xl font-bold text-pond-dark mb-2">Create Your Vibe Profile</h2>
+      <p className="text-gray-500 mb-6">Tell us about your community's vibe so we can match you with others! 🐸</p>
       
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Community Info */}
@@ -173,14 +175,33 @@ export default function FrogForm({ onSubmit }: FrogFormProps) {
           )}
         </div>
         
+        {/* Twitter Handle (for easier vibe sourcing) */}
+        <div>
+          <label htmlFor="twitter" className="block text-sm font-medium text-gray-700 mb-1">
+            Twitter Handle (Optional)
+          </label>
+          <div className="flex items-center">
+            <span className="text-gray-500 mr-2">@</span>
+            <input
+              type="text"
+              id="twitter"
+              value={twitterHandle}
+              onChange={handleTwitterHandleChange}
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-lily-green focus:border-lily-green"
+              placeholder="your_community"
+            />
+          </div>
+          <p className="text-xs text-gray-500 mt-1">We'll use this to help understand your vibe</p>
+        </div>
+        
         {/* Vibe Tags */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Select 5 Vibe Tags <span className="text-red-500">*</span> ({selectedTags.length}/5)
+            Select Your Vibe Tags <span className="text-red-500">*</span> ({selectedTags.length}/5)
           </label>
           <div className="flex flex-wrap gap-2">
             {VIBE_TAGS.map((tag) => (
-              <button
+              <motion.button
                 key={tag}
                 type="button"
                 className={`px-3 py-1 text-sm rounded-full transition-colors ${
@@ -190,67 +211,56 @@ export default function FrogForm({ onSubmit }: FrogFormProps) {
                 } ${selectedTags.length >= 5 && !selectedTags.includes(tag) ? 'opacity-50 cursor-not-allowed' : ''}`}
                 onClick={() => handleTagToggle(tag)}
                 disabled={selectedTags.length >= 5 && !selectedTags.includes(tag)}
+                whileHover={{ scale: selectedTags.includes(tag) || selectedTags.length < 5 ? 1.05 : 1 }}
+                whileTap={{ scale: 0.95 }}
               >
                 {tag}
-              </button>
+              </motion.button>
             ))}
           </div>
         </div>
         
-        {/* Reflection Questions */}
+        {/* Secret Sauce Question */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Answer 2 Reflection Questions <span className="text-red-500">*</span> ({selectedPrompts.length}/2)
+          <label htmlFor="secretSauce" className="block text-sm font-medium text-gray-700 mb-1">
+            What's your community's secret sauce? <span className="text-red-500">*</span>
           </label>
-          <div className="space-y-4">
-            {REFLECTION_PROMPTS.map((prompt) => (
-              <div key={prompt} className="border rounded-lg p-4">
-                <div className="flex items-start">
-                  <input
-                    type="checkbox"
-                    id={`prompt-${prompt}`}
-                    checked={selectedPrompts.includes(prompt)}
-                    onChange={() => handlePromptToggle(prompt)}
-                    className="mt-1 mr-2"
-                    disabled={selectedPrompts.length >= 2 && !selectedPrompts.includes(prompt)}
-                  />
-                  <label htmlFor={`prompt-${prompt}`} className="text-sm font-medium">{prompt}</label>
-                </div>
-                
-                {selectedPrompts.includes(prompt) && (
-                  <textarea
-                    value={reflections[prompt] || ''}
-                    onChange={(e) => handleReflectionChange(prompt, e.target.value)}
-                    rows={2}
-                    className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-lily-green focus:border-lily-green"
-                    required
-                  />
-                )}
-              </div>
-            ))}
-          </div>
+          <textarea
+            id="secretSauce"
+            value={secretSauce}
+            onChange={(e) => setSecretSauce(e.target.value)}
+            rows={3}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-lily-green focus:border-lily-green"
+            placeholder="Tell us what makes your community special..."
+            required
+          />
+          <p className="text-xs text-gray-500 mt-1">This helps us match you with communities that complement your vibe</p>
         </div>
         
         {/* Contact Links */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Contact Links
+            How can others reach you?
           </label>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="twitter" className="block text-xs text-gray-500 mb-1">Twitter</label>
+              <label htmlFor="contactTwitter" className="flex items-center text-xs text-gray-500 mb-1">
+                <span className="mr-1">🐦</span> Twitter
+              </label>
               <input
-                type="url"
-                id="twitter"
+                type="text"
+                id="contactTwitter"
                 value={contactLinks.twitter}
                 onChange={(e) => handleContactLinkChange('twitter', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-lily-green focus:border-lily-green"
-                placeholder="https://twitter.com/..."
+                placeholder="@your_community"
               />
             </div>
             
             <div>
-              <label htmlFor="website" className="block text-xs text-gray-500 mb-1">Website</label>
+              <label htmlFor="website" className="flex items-center text-xs text-gray-500 mb-1">
+                <span className="mr-1">🌐</span> Website
+              </label>
               <input
                 type="url"
                 id="website"
@@ -260,30 +270,6 @@ export default function FrogForm({ onSubmit }: FrogFormProps) {
                 placeholder="https://..."
               />
             </div>
-            
-            <div>
-              <label htmlFor="email" className="block text-xs text-gray-500 mb-1">Email</label>
-              <input
-                type="email"
-                id="email"
-                value={contactLinks.email}
-                onChange={(e) => handleContactLinkChange('email', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-lily-green focus:border-lily-green"
-                placeholder="hello@..."
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="farcaster" className="block text-xs text-gray-500 mb-1">Farcaster</label>
-              <input
-                type="url"
-                id="farcaster"
-                value={contactLinks.farcaster}
-                onChange={(e) => handleContactLinkChange('farcaster', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-lily-green focus:border-lily-green"
-                placeholder="https://warpcast.com/..."
-              />
-            </div>
           </div>
         </div>
         
@@ -291,12 +277,13 @@ export default function FrogForm({ onSubmit }: FrogFormProps) {
         <div className="flex justify-end">
           <motion.button
             type="submit"
-            className="px-6 py-2 bg-lily-green text-white font-medium rounded-md shadow-sm hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lily-green disabled:opacity-50"
+            className="px-6 py-3 bg-lily-green text-white font-medium rounded-md shadow-lg hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lily-green disabled:opacity-50 flex items-center"
             disabled={isSubmitting}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.98 }}
           >
-            {isSubmitting ? 'Creating...' : 'Create Your Frog'}
+            <span className="mr-2">{isSubmitting ? '🐸 Creating...' : '🐸 Create Your Frog'}</span>
+            {!isSubmitting && <span className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded">Ribbit!</span>}
           </motion.button>
         </div>
       </form>
