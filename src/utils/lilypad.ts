@@ -117,31 +117,27 @@ export async function compareVibes(frogA: Frog, frogB: Frog): Promise<VibeMatch>
       const baseScore = 65 + (sharedTags * 6);
       const matchScore = Math.min(95, baseScore);
       
-      // Generate a deterministic but reasonably unique response
-      const summary = `${frogA.name} and ${frogB.name} share ${sharedTags} interests and have complementary community values!`;
+      // Generate a deterministic but reasonably unique response with new format
+      const vibe_phrase = `${frogA.name} + ${frogB.name} = Web3 dream team 🚀`;
       
-      // Select possibility spark based on shared tags or default to generic ones
-      let possibilitySpark = "Build a joint community initiative to connect your audiences.";
-      if (frogA.tags.includes('DeFi degen') && frogB.tags.includes('DeFi degen')) {
-        possibilitySpark = "Collaborate on a DeFi educational series for both communities.";
-      } else if (frogA.tags.includes('Artist-led') || frogB.tags.includes('Artist-led')) {
-        possibilitySpark = "Create a collaborative NFT collection featuring artists from both communities.";
-      } else if (frogA.tags.includes('Builder-centric') || frogB.tags.includes('Builder-centric')) {
-        possibilitySpark = "Launch a joint hackathon to build tools that benefit both communities.";
+      // Select collab idea based on shared tags or default to generic ones
+      let collab_idea = "Run a joint Twitter space about your shared vision for Web3.";
+      if (frogA.tags.some(t => t.includes('DeFi')) && frogB.tags.some(t => t.includes('DeFi'))) {
+        collab_idea = "Host a DeFi edu workshop featuring experts from both communities.";
+      } else if (frogA.tags.some(t => t.includes('Artist')) || frogB.tags.some(t => t.includes('Artist'))) {
+        collab_idea = "Collaborate on a NFT collection featuring work from both communities.";
+      } else if (frogA.tags.some(t => t.includes('Builder')) || frogB.tags.some(t => t.includes('Builder'))) {
+        collab_idea = "Run a weekend hackathon to build tools that benefit both communities.";
       }
       
-      // Generate vibe path steps
-      const vibePath = [
-        "Set up an initial Discord call to get to know each other's communities.",
-        "Identify specific members who would be good points of contact for the collaboration.",
-        "Create a shared document outlining goals and next steps for the partnership."
-      ];
+      // Generate connect tip
+      const connect_tip = "DM each other on Twitter to set up a quick intro call between community leads.";
       
       return {
         match_score: matchScore,
-        summary,
-        possibility_spark: possibilitySpark,
-        vibe_path: vibePath
+        vibe_phrase,
+        collab_idea,
+        connect_tip
       };
     }
     
@@ -151,20 +147,23 @@ export async function compareVibes(frogA: Frog, frogB: Frog): Promise<VibeMatch>
       messages: [
         {
           role: "system",
-          content: `You are VibeCheck, an AI that analyzes the compatibility between two Web3 communities and provides creative suggestions for collaboration.
-          
-          Given information about two community "frogs", analyze their vibes, values, and potential for collaboration.
-          Return:
-          - A match score (0-100)
-          - A brief summary of their compatibility
-          - A creative "possibility spark" idea they could work on together
-          - 3 specific next steps for collaboration in an array called "vibe_path"
-          
-          Format your response as a valid JSON object with these fields:
-          match_score: number (0-100)
-          summary: string
-          possibility_spark: string
-          vibe_path: array of 3 strings`
+          content: `You are VibeCheck, a fun AI that evaluates the compatibility between two Web3 communities and helps them find common ground.
+
+Given information about two community "frogs", analyze their vibes and suggest ways they could work together. Focus on their shared interests and complementary strengths.
+
+Return:
+- A match score (0-100) - be optimistic! Most scores should be 65-95
+- A vibe phrase that captures what makes them great together (short, catchy, with an emoji)
+- A specific collab idea they could implement together (practical, achievable, fun)
+- A connect tip (casual first step to start working together)
+
+Format your response as a valid JSON object with these fields:
+match_score: number (0-100)
+vibe_phrase: string (short descriptor with emoji)
+collab_idea: string (specific project they could do)
+connect_tip: string (how to start the conversation)
+
+Keep everything friendly, specific and brief - this is for sharing on social media!`
         },
         {
           role: "user",
@@ -181,8 +180,6 @@ export async function compareVibes(frogA: Frog, frogB: Frog): Promise<VibeMatch>
           Bio: ${frogB.bio}
           Tags: ${frogB.tags.join(', ')}
           Reflections: ${frogB.reflections.join(' | ')}
-          
-          Analyze their compatibility, provide a match score (0-100), a summary of why they'd vibe, a creative project idea (possibility spark), and 3 specific next steps (vibe_path).
           
           Return only valid JSON with no extra text.`
         }
@@ -216,13 +213,9 @@ export async function compareVibes(frogA: Frog, frogB: Frog): Promise<VibeMatch>
     // Fallback if parsing fails
     return {
       match_score: 75,
-      summary: "These frogs seem to have compatible vibes!",
-      possibility_spark: "They could collaborate on a community project.",
-      vibe_path: [
-        "Schedule an initial meet & greet call",
-        "Identify mutual interests and goals",
-        "Plan a joint online event"
-      ]
+      vibe_phrase: "Complementary strengths 💪",
+      collab_idea: "Run a joint Twitter space about your shared interests.",
+      connect_tip: "DM each other to set up a quick intro call."
     };
   } catch (error) {
     console.error('Error comparing vibes:', error);
@@ -230,13 +223,9 @@ export async function compareVibes(frogA: Frog, frogB: Frog): Promise<VibeMatch>
     // Return fallback data
     return {
       match_score: 70,
-      summary: "Connection issues prevented full analysis, but these communities look compatible!",
-      possibility_spark: "Consider exploring collaborative opportunities in shared interest areas.",
-      vibe_path: [
-        "Connect on social platforms",
-        "Share resources and ideas",
-        "Explore potential collaboration areas"
-      ]
+      vibe_phrase: "Potential collaborators 🌟",
+      collab_idea: "Consider exploring opportunities in your shared interest areas.",
+      connect_tip: "Connect on Twitter and start a conversation."
     };
   }
 }
