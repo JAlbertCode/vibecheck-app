@@ -34,22 +34,24 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
     if (!matchCardRef.current) return;
     
     try {
-      // Prepare for capture by ensuring stable dimensions and styles
-      matchCardRef.current.classList.add('capturing-card');
+      // Create a clone of the card for screenshot to prevent DOM manipulation issues
+      const cloneCard = matchCardRef.current.cloneNode(true) as HTMLElement;
+      cloneCard.style.position = 'absolute';
+      cloneCard.style.top = '-9999px';
+      cloneCard.style.left = '-9999px';
+      document.body.appendChild(cloneCard);
       
-      // Fix: Create a style tag to prevent content shifts during capture
-      const styleTag = document.createElement('style');
-      styleTag.innerHTML = `
-        .capturing-card a {
-          display: inline-block;
-          position: relative;
-          transform: translateY(0);
-        }
-        .capturing-card * {
-          transform: translateZ(0);
-        }
-      `;
-      document.head.appendChild(styleTag);
+      // Set explicit dimensions
+      cloneCard.style.width = `${matchCardRef.current.offsetWidth}px`;
+      cloneCard.style.height = `${matchCardRef.current.offsetHeight}px`;
+      
+      // Force all elements to have fixed positions
+      Array.from(cloneCard.querySelectorAll('*')).forEach(el => {
+        const element = el as HTMLElement;
+        element.style.transform = 'none';
+        element.style.transition = 'none';
+        element.style.animation = 'none';
+      });
       
       const options = {
         backgroundColor: null,
@@ -57,16 +59,14 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
         allowTaint: true,
         scale: 2, // Higher quality
         logging: false,
-        // Force a specific size to ensure consistency
         width: matchCardRef.current.offsetWidth,
         height: matchCardRef.current.offsetHeight
       };
       
-      const canvas = await html2canvas(matchCardRef.current, options);
+      const canvas = await html2canvas(cloneCard, options);
       
-      // Remove the class and style tag after capturing
-      matchCardRef.current.classList.remove('capturing-card');
-      document.head.removeChild(styleTag);
+      // Remove the clone after capturing
+      document.body.removeChild(cloneCard);
       
       const image = canvas.toDataURL('image/png');
       
@@ -84,22 +84,24 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
     if (!matchCardRef.current) return;
     
     try {
-      // Prepare for capture by ensuring stable dimensions and styles
-      matchCardRef.current.classList.add('capturing-card');
+      // Create a clone of the card for screenshot to prevent DOM manipulation issues
+      const cloneCard = matchCardRef.current.cloneNode(true) as HTMLElement;
+      cloneCard.style.position = 'absolute';
+      cloneCard.style.top = '-9999px';
+      cloneCard.style.left = '-9999px';
+      document.body.appendChild(cloneCard);
       
-      // Fix: Create a style tag to prevent content shifts during capture
-      const styleTag = document.createElement('style');
-      styleTag.innerHTML = `
-        .capturing-card a {
-          display: inline-block;
-          position: relative;
-          transform: translateY(0);
-        }
-        .capturing-card * {
-          transform: translateZ(0);
-        }
-      `;
-      document.head.appendChild(styleTag);
+      // Set explicit dimensions
+      cloneCard.style.width = `${matchCardRef.current.offsetWidth}px`;
+      cloneCard.style.height = `${matchCardRef.current.offsetHeight}px`;
+      
+      // Force all elements to have fixed positions
+      Array.from(cloneCard.querySelectorAll('*')).forEach(el => {
+        const element = el as HTMLElement;
+        element.style.transform = 'none';
+        element.style.transition = 'none';
+        element.style.animation = 'none';
+      });
       
       const options = {
         backgroundColor: null,
@@ -111,11 +113,10 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
         logging: false
       };
       
-      const canvas = await html2canvas(matchCardRef.current, options);
+      const canvas = await html2canvas(cloneCard, options);
       
-      // Remove the class and style tag after capturing
-      matchCardRef.current.classList.remove('capturing-card');
-      document.head.removeChild(styleTag);
+      // Remove the clone after capturing
+      document.body.removeChild(cloneCard);
       
       canvas.toBlob(async (blob) => {
         if (!blob) return;
@@ -124,7 +125,23 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
           await navigator.clipboard.write([
             new ClipboardItem({ 'image/png': blob })
           ]);
-          alert('Match card copied to clipboard!');
+          // Use a nicer notification instead of an alert
+          const notification = document.createElement('div');
+          notification.textContent = '✅ Copied to clipboard!';
+          notification.style.position = 'fixed';
+          notification.style.bottom = '20px';
+          notification.style.left = '50%';
+          notification.style.transform = 'translateX(-50%)';
+          notification.style.backgroundColor = '#10b981';
+          notification.style.color = 'white';
+          notification.style.padding = '10px 20px';
+          notification.style.borderRadius = '20px';
+          notification.style.zIndex = '1000';
+          document.body.appendChild(notification);
+          
+          setTimeout(() => {
+            document.body.removeChild(notification);
+          }, 3000);
         } catch (error) {
           console.error('Error copying to clipboard:', error);
           alert('Failed to copy to clipboard. Try downloading instead.');
@@ -232,10 +249,12 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
               />
             </div>
             
-            <div className={`bg-lily-green text-white font-bold rounded-full w-16 h-16 flex flex-col items-center justify-center relative shadow-lg ${match.match_score >= 85 ? 'bg-green-600' : match.match_score >= 75 ? 'bg-green-500' : match.match_score >= 65 ? 'bg-blue-500' : 'bg-blue-400'}`}>
-              <div className="absolute inset-0 rounded-full bg-white opacity-20 animate-pulse"></div>
-              <span className="relative z-10 text-2xl">{match.match_score}%</span>
-              <span className="relative z-10 text-[10px] -mt-1">match</span>
+            <div className={`bg-lily-green text-white font-bold rounded-full w-16 h-16 flex flex-col items-center justify-center relative shadow-lg`} style={{
+              background: `conic-gradient(#10b981 ${match.match_score}%, #f3f4f6 0%)`
+            }}>
+              <div className="absolute inset-1 rounded-full bg-white"></div>
+              <span className="relative z-10 text-2xl font-bold text-pond-dark">{match.match_score}</span>
+              <span className="relative z-10 text-[10px] -mt-1 text-pond-dark">vibe match</span>
             </div>
             
             <div className={`${logoSize} rounded-full overflow-hidden bg-white shadow ring-2 ring-lily-green flex items-center justify-center`}>
@@ -445,32 +464,35 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
       </div>
       
       {/* Share buttons */}
-      <div className="mt-6 flex justify-center space-x-4">
+      <div className="mt-6 flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
         <motion.button
           onClick={handleDownload}
-          className="px-4 py-2 bg-lily-green text-white font-medium rounded-full shadow hover:bg-opacity-90 focus:outline-none flex items-center space-x-2 min-w-[120px] justify-center"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          className="px-6 py-3 bg-lily-green text-white font-medium rounded-lg shadow-md hover:shadow-lg hover:bg-opacity-90 focus:outline-none flex items-center gap-2 justify-center transition-all duration-200"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
-          <span>📱</span><span>Save Image</span>
+          <span className="text-lg">💾</span>
+          <span>Save Image</span>
         </motion.button>
         
         <motion.button
           onClick={handleCopyToClipboard}
-          className="px-4 py-2 bg-pond-dark text-white font-medium rounded-full shadow hover:bg-opacity-90 focus:outline-none flex items-center space-x-2 min-w-[120px] justify-center"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          className="px-6 py-3 bg-white text-pond-dark border border-lily-green font-medium rounded-lg shadow-md hover:shadow-lg hover:bg-lily-green hover:text-white focus:outline-none flex items-center gap-2 justify-center transition-all duration-200"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
-          <span>📋</span><span>Copy</span>
+          <span className="text-lg">📋</span>
+          <span>Copy to Clipboard</span>
         </motion.button>
         
         <motion.button
           onClick={handleShareOnTwitter}
-          className="px-4 py-2 bg-blue-400 text-white font-medium rounded-full shadow hover:bg-opacity-90 focus:outline-none flex items-center space-x-2 min-w-[120px] justify-center"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          className="px-6 py-3 bg-[#1DA1F2] text-white font-medium rounded-lg shadow-md hover:shadow-lg hover:bg-opacity-90 focus:outline-none flex items-center gap-2 justify-center transition-all duration-200"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
-          <span>🐦</span><span>Tweet</span>
+          <span className="text-lg">🐦</span>
+          <span>Share on Twitter</span>
         </motion.button>
       </div>
     </div>
