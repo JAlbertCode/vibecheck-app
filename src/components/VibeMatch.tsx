@@ -137,8 +137,9 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
   };
 
   const handleShareOnTwitter = async () => {
-    // Update the Twitter sharing text to be shorter and more engaging
-    const text = `${myFrog.name} x ${otherFrog.name} = ${match.match_score}% vibe match! 🐸✨ Check out their collab potential on @lilypad_tech's VibeCheck`;
+    // Update the Twitter sharing text to include the actual percentage
+    const vibeLevel = match.match_score >= 85 ? '🔥' : match.match_score >= 75 ? '✨' : match.match_score >= 65 ? '👌' : '🌱';
+    const text = `${myFrog.name} x ${otherFrog.name} = ${match.match_score}% vibe match! ${vibeLevel} Check out our collab potential on VibeCheck by @lilypad_tech`;
     const url = 'https://vibecheck.lilypad.tech'; // Replace with your actual URL
     
     window.open(
@@ -231,9 +232,10 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
               />
             </div>
             
-            <div className="bg-lily-green text-white text-3xl font-bold rounded-full w-16 h-16 flex items-center justify-center relative shadow-lg">
+            <div className={`bg-lily-green text-white font-bold rounded-full w-16 h-16 flex flex-col items-center justify-center relative shadow-lg ${match.match_score >= 85 ? 'bg-green-600' : match.match_score >= 75 ? 'bg-green-500' : match.match_score >= 65 ? 'bg-blue-500' : 'bg-blue-400'}`}>
               <div className="absolute inset-0 rounded-full bg-white opacity-20 animate-pulse"></div>
-              <span className="relative z-10">{match.match_score}%</span>
+              <span className="relative z-10 text-2xl">{match.match_score}%</span>
+              <span className="relative z-10 text-[10px] -mt-1">match</span>
             </div>
             
             <div className={`${logoSize} rounded-full overflow-hidden bg-white shadow ring-2 ring-lily-green flex items-center justify-center`}>
@@ -271,7 +273,13 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
           </div>
           
           <div className="mt-2 bg-pond-dark bg-opacity-10 px-4 py-1 rounded-full inline-block">
-            <span className="text-lg font-medium text-pond-dark">{match.vibe_phrase || "Unique vibe synergy"}</span>
+            <span className="text-lg font-medium text-pond-dark flex items-center">
+              {match.match_score >= 85 && <span className="mr-1">🔥</span>}
+              {match.match_score >= 75 && match.match_score < 85 && <span className="mr-1">✨</span>}
+              {match.match_score >= 65 && match.match_score < 75 && <span className="mr-1">👌</span>}
+              {match.match_score < 65 && <span className="mr-1">🌱</span>}
+              {match.vibe_phrase || "Unique vibe synergy"}
+            </span>
           </div>
           
           {/* Shared Tags */}

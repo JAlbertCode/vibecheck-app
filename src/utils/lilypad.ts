@@ -103,35 +103,126 @@ export async function generateFrogImage(frog: Omit<Frog, 'id' | 'image_url'>): P
  */
 export async function compareVibes(frogA: Frog, frogB: Frog): Promise<VibeMatch> {
   try {
-    // If in mock mode, generate deterministic results based on the frog names
+    // If in mock mode, generate deterministic results based on the frog profiles with real similarities
     if (isMockMode) {
-      console.log('MOCK MODE: Generating mock vibe match instead of calling Lilypad API');
+      console.log('MOCK MODE: Generating vibe match with real similarity metrics');
       
-      // Create a seed from both frog names
-      const nameSeedA = frogA.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      const nameSeedB = frogB.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      const combinedSeed = (nameSeedA * nameSeedB) % 100;
+      // Calculate similarity based on multiple factors:
       
-      // Generate a match score between 65-95 based on shared tags
-      const sharedTags = frogA.tags.filter(tag => frogB.tags.includes(tag)).length;
-      const baseScore = 65 + (sharedTags * 6);
-      const matchScore = Math.min(95, baseScore);
+      // 1. Tag overlap (0-40 points)
+      const frogATags = new Set(frogA.tags.map(tag => tag.toLowerCase()));
+      const frogBTags = new Set(frogB.tags.map(tag => tag.toLowerCase()));
       
-      // Generate a deterministic but reasonably unique response with new format
-      const vibe_phrase = `${frogA.name} + ${frogB.name} = Web3 dream team 🚀`;
+      // Calculate Jaccard similarity (intersection / union)
+      const intersection = new Set([...frogATags].filter(tag => frogBTags.has(tag)));
+      const union = new Set([...frogATags, ...frogBTags]);
       
-      // Select collab idea based on shared tags or default to generic ones
-      let collab_idea = "Run a joint Twitter space about your shared vision for Web3.";
-      if (frogA.tags.some(t => t.includes('DeFi')) && frogB.tags.some(t => t.includes('DeFi'))) {
-        collab_idea = "Host a DeFi edu workshop featuring experts from both communities.";
-      } else if (frogA.tags.some(t => t.includes('Artist')) || frogB.tags.some(t => t.includes('Artist'))) {
-        collab_idea = "Collaborate on a NFT collection featuring work from both communities.";
-      } else if (frogA.tags.some(t => t.includes('Builder')) || frogB.tags.some(t => t.includes('Builder'))) {
-        collab_idea = "Run a weekend hackathon to build tools that benefit both communities.";
+      // Convert to a score between 0-40
+      const tagSimilarity = Math.round((intersection.size / union.size) * 40);
+      
+      // 2. Bio similarity (0-20 points)
+      // Check for key word overlap in bios
+      const bioWordsA = frogA.bio.toLowerCase().split(/\s+/).filter(word => word.length > 4);
+      const bioWordsB = frogB.bio.toLowerCase().split(/\s+/).filter(word => word.length > 4);
+      
+      const bioWordsSetA = new Set(bioWordsA);
+      const bioWordsSetB = new Set(bioWordsB);
+      
+      const bioIntersection = new Set([...bioWordsSetA].filter(word => bioWordsSetB.has(word)));
+      const bioUnion = new Set([...bioWordsSetA, ...bioWordsSetB]);
+      
+      // Convert to a score between 0-20
+      const bioSimilarity = Math.round((bioIntersection.size / Math.max(1, bioUnion.size)) * 20);
+      
+      // 3. Reflection compatibility (0-30 points)
+      // Look for key themes and sentiment in reflections
+      const reflectionWordsA = frogA.reflections.join(' ').toLowerCase().split(/\s+/).filter(word => word.length > 4);
+      const reflectionWordsB = frogB.reflections.join(' ').toLowerCase().split(/\s+/).filter(word => word.length > 4);
+      
+      const reflectionWordsSetA = new Set(reflectionWordsA);
+      const reflectionWordsSetB = new Set(reflectionWordsB);
+      
+      const reflectionIntersection = new Set([...reflectionWordsSetA].filter(word => reflectionWordsSetB.has(word)));
+      
+      // 0-20 points for word overlap
+      const reflectionOverlap = Math.min(20, reflectionIntersection.size * 4);
+      
+      // 0-10 points for complementary values (using some heuristics)
+      let complementaryBonus = 0;
+      const buildTerms = ['build', 'create', 'develop', 'code', 'engineer'];
+      const designTerms = ['design', 'art', 'creative', 'visual', 'style'];
+      const communityTerms = ['community', 'people', 'members', 'together', 'collaborative'];
+      
+      // Check if communities have complementary skills/focus
+      const hasBuilderFocus = [...reflectionWordsSetA, ...reflectionWordsSetB].some(word => buildTerms.includes(word));
+      const hasDesignFocus = [...reflectionWordsSetA, ...reflectionWordsSetB].some(word => designTerms.includes(word));
+      const hasCommunityFocus = [...reflectionWordsSetA, ...reflectionWordsSetB].some(word => communityTerms.includes(word));
+      
+      if ((hasBuilderFocus && hasDesignFocus) || (hasBuilderFocus && hasCommunityFocus) || (hasDesignFocus && hasCommunityFocus)) {
+        complementaryBonus = 10;
       }
       
-      // Generate connect tip
-      const connect_tip = "DM each other on Twitter to set up a quick intro call between community leads.";
+      const reflectionSimilarity = reflectionOverlap + complementaryBonus;
+      
+      // 4. Random variation factor (0-10 points) - adds some natural variance
+      // Use a seed from both frog names for consistency in results
+      const nameSeedA = frogA.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const nameSeedB = frogB.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const combinedSeed = (nameSeedA * nameSeedB) % 11; // 0-10
+      
+      // Calculate final match score (0-100)
+      const rawScore = tagSimilarity + bioSimilarity + reflectionSimilarity + combinedSeed;
+      
+      // Ensure score is within reasonable range (50-95) - most communities should have some compatibility
+      const matchScore = Math.max(50, Math.min(95, rawScore));
+      
+      console.log(`Match details: Tags ${tagSimilarity}/40, Bio ${bioSimilarity}/20, Reflections ${reflectionSimilarity}/30, Random ${combinedSeed}/10, Total ${matchScore}/100`);
+      
+      // Use the match score to influence vibe phrase
+      let vibe_phrase = '';
+      if (matchScore >= 85) {
+        vibe_phrase = `${frogA.name} + ${frogB.name} = Dream team match! ⭐`;
+      } else if (matchScore >= 75) {
+        vibe_phrase = `Great potential between ${frogA.name} & ${frogB.name} 🚀`;
+      } else if (matchScore >= 65) {
+        vibe_phrase = `Interesting synergy between these communities 💡`;
+      } else {
+        vibe_phrase = `Some common ground to build on 🌱`;
+      }
+      
+      // Select collab idea based on shared tags and score
+      let collab_idea = '';
+      if (matchScore >= 80) {
+        if (frogA.tags.some(t => t.toLowerCase().includes('defi')) && frogB.tags.some(t => t.toLowerCase().includes('defi'))) {
+          collab_idea = "Co-develop a new DeFi protocol combining both communities' expertise.";
+        } else if (frogA.tags.some(t => t.toLowerCase().includes('artist')) || frogB.tags.some(t => t.toLowerCase().includes('artist'))) {
+          collab_idea = "Launch a collaborative NFT collection with proceeds funding a joint hackathon.";
+        } else if (frogA.tags.some(t => t.toLowerCase().includes('builder')) || frogB.tags.some(t => t.toLowerCase().includes('builder'))) {
+          collab_idea = "Create a joint accelerator program for projects that benefit both ecosystems.";
+        } else {
+          collab_idea = "Run a high-impact event series co-branded by both communities.";
+        }
+      } else if (matchScore >= 65) {
+        if (intersection.size > 0) {
+          // Use their actual common interests
+          const commonInterests = Array.from(intersection).join(', ');
+          collab_idea = `Organize a workshop series around your shared interests in ${commonInterests}.`;
+        } else {
+          collab_idea = "Host a Twitter Space to explore potential collaboration areas.";
+        }
+      } else {
+        collab_idea = "Start with a community exchange program to learn from each other.";
+      }
+      
+      // Generate connect tip based on score
+      let connect_tip = '';
+      if (matchScore >= 80) {
+        connect_tip = "Schedule a leadership call to map out collaboration possibilities.";
+      } else if (matchScore >= 65) {
+        connect_tip = "DM each other to arrange a casual intro call between community leads.";
+      } else {
+        connect_tip = "Connect on Twitter and start by engaging with each other's content.";
+      }
       
       return {
         match_score: matchScore,
