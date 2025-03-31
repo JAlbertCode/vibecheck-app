@@ -8,6 +8,43 @@ const LILYPAD_API_KEY = process.env.NEXT_PUBLIC_LILYPAD_API_KEY || 'mock-lilypad
 // For demo purposes, we'll mock API calls if no valid API key is provided
 const isMockMode = !process.env.NEXT_PUBLIC_LILYPAD_API_KEY;
 
+// Helper function to retry API calls
+async function fetchWithRetry(url: string, options: RequestInit, maxRetries = 3, delay = 2000): Promise<Response> {
+  let lastError: Error;
+  
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      console.log(`API call attempt ${attempt + 1}/${maxRetries}`);
+      const response = await fetch(url, options);
+      
+      if (response.ok) {
+        return response;
+      }
+      
+      if (response.status === 429) { // Rate limited
+        const retryAfter = response.headers.get('Retry-After');
+        const waitTime = retryAfter ? parseInt(retryAfter, 10) * 1000 : delay * (attempt + 1);
+        console.log(`Rate limited. Waiting ${waitTime}ms before retry`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+        continue;
+      }
+      
+      throw new Error(`API call failed with status: ${response.status} - ${response.statusText}`);
+    } catch (error) {
+      console.error(`Attempt ${attempt + 1} failed:`, error);
+      lastError = error as Error;
+      
+      if (attempt < maxRetries - 1) {
+        const waitTime = delay * Math.pow(2, attempt); // Exponential backoff
+        console.log(`Waiting ${waitTime}ms before retry`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+      }
+    }
+  }
+  
+  throw lastError || new Error('API call failed after multiple retries');
+}
+
 /**
  * Generate a frog image based on profile details
  */
@@ -38,19 +75,16 @@ export async function generateFrogImage(frog: Omit<Frog, 'id' | 'image_url'>): P
       }
     };
 
-    // Call Lilypad API
-    const response = await fetch(`${LILYPAD_API_URL}/chat/completions`, {
+    // Call Lilypad API with retry logic
+    console.log('Calling Lilypad API to generate frog image...');
+    const response = await fetchWithRetry(`${LILYPAD_API_URL}/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${LILYPAD_API_KEY}`,
       },
       body: JSON.stringify(payload)
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to generate image: ${response.statusText}`);
-    }
+    }, 5, 3000); // More retries with longer delays for image generation
 
     const data = await response.json();
     
@@ -158,19 +192,16 @@ export async function compareVibes(frogA: Frog, frogB: Frog): Promise<VibeMatch>
       }
     };
 
-    // Call Lilypad API
-    const response = await fetch(`${LILYPAD_API_URL}/chat/completions`, {
+    // Call Lilypad API with retry logic
+    console.log('Calling Lilypad API to compare vibes...');
+    const response = await fetchWithRetry(`${LILYPAD_API_URL}/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${LILYPAD_API_KEY}`,
       },
       body: JSON.stringify(payload)
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to compare vibes: ${response.statusText}`);
-    }
+    }, 3, 2000);
 
     const data = await response.json();
     

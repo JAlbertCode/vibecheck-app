@@ -91,8 +91,15 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
       {/* Match Card (for download/sharing) */}
       <div 
         ref={matchCardRef} 
-        className="bg-white p-6 rounded-xl shadow-lg border-2 border-lily-green overflow-hidden"
+        className="bg-gradient-to-br from-white to-pond-light p-6 rounded-xl shadow-lg border-2 border-lily-green overflow-hidden relative"
       >
+        {/* Decorative elements */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+          <div className="absolute -top-8 -left-8 w-24 h-24 rounded-full bg-lily-green opacity-10"></div>
+          <div className="absolute -bottom-10 -right-10 w-32 h-32 rounded-full bg-lily-green opacity-10"></div>
+          <div className="absolute top-1/4 right-10 w-4 h-4 rounded-full bg-lily-green opacity-20"></div>
+          <div className="absolute bottom-1/4 left-10 w-6 h-6 rounded-full bg-lily-green opacity-20"></div>
+        </div>
         <div className="flex justify-between items-start">
           <div className="flex-1">
             <h2 className="text-2xl font-bold text-pond-dark">Vibe Match Results</h2>
@@ -105,8 +112,9 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
             </div>
           </div>
           
-          <div className="bg-lily-green text-white text-3xl font-bold rounded-full w-16 h-16 flex items-center justify-center">
-            {match.match_score}%
+          <div className="bg-lily-green text-white text-3xl font-bold rounded-full w-20 h-20 flex items-center justify-center relative shadow-lg">
+            <div className="absolute inset-0 rounded-full bg-white opacity-20 animate-pulse"></div>
+            <span className="relative z-10">{match.match_score}%</span>
           </div>
         </div>
         

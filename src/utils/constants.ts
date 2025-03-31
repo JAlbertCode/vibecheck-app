@@ -1,7 +1,13 @@
 export const VIBE_TAGS = [
+  // Original tags
   "Meme-forward", "Research-driven", "Artist-led", "Builder-centric", "Open-source purist",
   "DeFi degen", "Wholesome", "Shitposters", "IRL-heavy", "Online-native", "ZK-maxi",
-  "Onchain games", "Modular devs", "AI explorers", "Grant-seekers", "Event hosts"
+  "Onchain games", "Modular devs", "AI explorers", "Grant-seekers", "Event hosts",
+  
+  // Web3 gaming and SDK tags
+  "Web3 gaming", "GameFi builders", "SDK developers", "Tool creators", 
+  "Infrastructure nerds", "Protocol designers", "NFT gaming", "P2E community",
+  "Game devs", "Dev tooling", "API enthusiasts", "Web3 UX/UI"
 ];
 
 export const REFLECTION_PROMPTS = [

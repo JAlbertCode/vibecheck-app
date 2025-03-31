@@ -73,9 +73,12 @@ export default function FrogForm({ onSubmit }: FrogFormProps) {
     
     // Validation
     if (!name || !bio || selectedTags.length === 0 || selectedPrompts.length !== 2) {
-      alert('Please fill out all required fields');
+      alert('Please fill out all required fields (Community Name, Bio, 5 Vibe Tags, and 2 Reflection Questions)');
       return;
     }
+    
+    // Default logo URL if none provided
+    const finalLogoUrl = logoUrl || `https://via.placeholder.com/100/00cc88/ffffff?text=${name.charAt(0)}`;
     
     setIsSubmitting(true);
     
@@ -85,7 +88,7 @@ export default function FrogForm({ onSubmit }: FrogFormProps) {
       await onSubmit({
         name,
         bio,
-        logo_url: logoUrl,
+        logo_url: finalLogoUrl,
         tags: selectedTags,
         reflections: reflectionArray,
         contact_links: contactLinks
@@ -154,7 +157,7 @@ export default function FrogForm({ onSubmit }: FrogFormProps) {
         
         <div>
           <label htmlFor="logo" className="block text-sm font-medium text-gray-700 mb-1">
-            Upload Logo <span className="text-red-500">*</span>
+            Upload Logo (Optional)
           </label>
           <input
             type="file"
@@ -162,7 +165,6 @@ export default function FrogForm({ onSubmit }: FrogFormProps) {
             accept="image/*"
             onChange={handleLogoChange}
             className="w-full"
-            required
           />
           {logoUrl && (
             <div className="mt-2">

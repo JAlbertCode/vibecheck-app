@@ -16,19 +16,22 @@ export default function FrogCard({ frog, onClick, isSelected = false }: FrogCard
       onClick={onClick}
     >
       <div className="flex items-center space-x-4">
-        <div className="relative w-16 h-16 rounded-full overflow-hidden bg-pond-light">
+        <div className="relative w-16 h-16 rounded-full overflow-hidden bg-pond-light flex-shrink-0">
           {frog.image_url ? (
-            <img
-              src={frog.image_url}
-              alt={`${frog.name} frog`}
-              className="w-full h-full object-cover"
-            />
+            <div className="w-full h-full bg-pond-light">
+              <img
+                src={frog.image_url}
+                alt={`${frog.name} frog`}
+                className="w-full h-full object-cover rounded-full"
+                style={{ objectPosition: 'center' }}
+              />
+            </div>
           ) : (
             <div className="flex items-center justify-center w-full h-full bg-lily-green text-white text-xl font-bold">
               {frog.name.charAt(0)}
             </div>
           )}
-          <div className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-white p-0.5">
+          <div className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-white p-0.5 border border-white shadow-sm">
             <img
               src={frog.logo_url}
               alt={`${frog.name} logo`}
