@@ -5,8 +5,8 @@ A fun, shareable browser dApp where communities can create vibe profiles (as fro
 ## 🎯 Core MVP Functionality
 
 - **Create a Vibe Profile (aka "your frog")**
-  - Community Name, Bio, Logo Upload
-  - Select 5 Vibe Tags from predefined list
+  - Community Name, Bio, Logo Upload (optional)
+  - Select 5 Vibe Tags from an expanded predefined list (including Web3 gaming and SDK categories)
   - Answer 2 reflection questions
   - Provide contact links
 
@@ -28,6 +28,24 @@ A fun, shareable browser dApp where communities can create vibe profiles (as fro
 - Supabase for storage
 - Lilypad Network for AI (LLM and image generation)
 - html2canvas for PNG generation
+
+## ✅ Implemented Features
+
+- Basic functionality for creating frogs and comparing them
+- Mock implementation for development without API keys
+- Improved navigation with persistent header
+- Enhanced loading indicators with animations
+- API retry logic with exponential backoff
+- Expanded vibe tag options
+- Visual enhancements for share cards
+
+## 🔜 Future Enhancements
+
+- **Frog Editing**: Allow users to edit their frog profiles after creation
+- **Dynamic Styling**: Generate custom UI themes based on each frog's visual identity
+- **Improved Image Quality**: Better frog image generation with logo incorporation
+- **Community Features**: Comments, reactions, and more social features
+- **Analytics**: Track and display match statistics
 
 ## 🚀 Getting Started
 
@@ -56,6 +74,18 @@ A fun, shareable browser dApp where communities can create vibe profiles (as fro
    ```
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser to see the app.
+
+## 🎨 Dynamic Styling Implementation Plan
+
+For the dynamic styling feature, we plan to:
+
+1. Extract primary colors from each frog's logo using a color extraction library
+2. Generate a custom color palette for each frog based on their primary color
+3. Apply these colors dynamically to UI elements when viewing or comparing frogs
+4. Create unique visual identities that reflect each community's brand
+5. Blend colors from both frogs when displaying match results
+
+This will make the app more visually engaging and reinforce the connection between a community's brand and their frog identity.
 
 ## 🌟 Contributing
 
