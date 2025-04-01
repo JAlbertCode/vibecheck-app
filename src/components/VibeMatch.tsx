@@ -556,7 +556,7 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
               <span className="mr-2">
                 {match.match_score >= 85 ? '🔥' : match.match_score >= 75 ? '✨' : match.match_score >= 65 ? '👍' : '🌱'}
               </span>
-              {match.vibe_phrase || "Open Worlds Uniting"}
+              {match.summary || "Open Worlds Uniting"}
             </span>
           </div>
           
@@ -576,9 +576,9 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
              style={{border: `1px solid ${brandTheme.primaryColor}30`}}>
           <h3 className="text-md font-semibold text-gray-800 flex items-center mb-2">
             <span className="text-xl mr-2">✨</span>
-            Collab Idea
+            Possibility Spark
           </h3>
-          <p className="text-gray-700">{match.collab_idea || match.possibility_spark}</p>
+          <p className="text-gray-700">{match.possibility_spark || match.collab_idea}</p>
         </div>
           
         <div className="mt-3 bg-white rounded-xl p-4 shadow-sm relative overflow-hidden" 
@@ -596,18 +596,18 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
                style={{backgroundColor: `${brandTheme.primaryColor}10`, 
                       backgroundImage: brandTheme.pattern1}}>
             <p className="text-gray-700 italic relative z-10">
-              "{match.connect_tip || match.first_connect || (match.vibe_path && match.vibe_path[0])}"
+              "{match.vibe_path && match.vibe_path[0] || match.connect_tip || match.first_connect}"
             </p>
             <div className="absolute top-2 left-2 transform -rotate-6 text-2xl opacity-10">"</div>
             <div className="absolute bottom-2 right-2 transform rotate-6 text-2xl opacity-10">"</div>
           </div>
           
           {/* Path steps */}
-          {match.vibe_path && match.vibe_path.length > 1 && (
-            <div className="mb-4">
-              <h4 className="text-sm font-medium text-gray-800 mb-2">Follow the path:</h4>
-              <div className="flex flex-col gap-2">
-                {match.vibe_path.slice(1, 3).map((step, index) => (
+          <div className="mb-4">
+            <h4 className="text-sm font-medium text-gray-800 mb-2">Follow the path:</h4>
+            <div className="flex flex-col gap-2">
+              {(match.vibe_path && match.vibe_path.length > 1) ? (
+                match.vibe_path.slice(1, 3).map((step, index) => (
                   <div key={index} className="flex items-start">
                     <span className="w-6 h-6 rounded-full flex items-center justify-center text-white font-medium text-sm mr-2"
                           style={{backgroundColor: siteColors.primary}}>
@@ -615,10 +615,12 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
                     </span>
                     <span className="text-sm text-gray-700">{step}</span>
                   </div>
-                ))}
-              </div>
+                ))
+              ) : (
+                <div className="text-sm text-gray-500 italic text-center py-1">Waiting for next steps...</div>
+              )}
             </div>
-          )}
+          </div>
           
           {/* Contact Info */}
           <div className="mt-4">

@@ -16,7 +16,7 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
   const [selectedTags, setSelectedTags] = useState<string[]>(initialData?.tags || []);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Vibe Questions (for more thoughtful matching)
+  // Reflection Questions (from the spec)
   const reflectionQuestions = [
     "What kind of thing would your community love to co-create?",
     "What types of vibes don't mix well with yours?",
@@ -53,7 +53,7 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
 
   // Add a new reflection with a random question
   const addReflection = () => {
-    if (reflections.length < 3) {
+    if (reflections.length < 2) { // Limit to exactly 2 questions as per spec
       // Choose a random question that hasn't been selected yet
       const availableQuestions = reflectionQuestions
         .map((_, index) => index)
@@ -307,13 +307,13 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
             <label className="block text-sm font-medium text-gray-700">
               Reflection Questions <span className="text-red-500">*</span>
             </label>
-            {reflections.length < 3 && (
+            {reflections.length < 2 && (
               <button
                 type="button"
                 onClick={addReflection}
                 className="text-sm text-lily-green hover:underline flex items-center"
               >
-                <span className="mr-1">+</span> Add Question
+                <span className="mr-1">+</span> Add Question ({reflections.length}/2)
               </button>
             )}
           </div>
