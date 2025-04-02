@@ -112,7 +112,7 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
     } 
     // If we have less than 5 tags or if we're editing a profile with 5+ tags,
     // allow adding the tag
-    else if (selectedTags.length < 5 || initialData?.tags?.length >= 5) {
+    else if (selectedTags.length < 5 || (initialData?.tags && initialData.tags.length >= 5)) {
       // If we're at exactly 5 and this is an edit with initially more than 5 tags,
       // we need to replace one of them
       if (selectedTags.length >= 5) {
