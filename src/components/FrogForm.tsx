@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import { VIBE_TAGS } from '../utils/constants';
 import type { Frog } from '../utils/supabase';
 
@@ -13,7 +12,14 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
   const [bio, setBio] = useState(initialData?.bio || '');
   const [logoUrl, setLogoUrl] = useState(initialData?.logo_url || '');
   const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [selectedTags, setSelectedTags] = useState<string[]>(initialData?.tags || []);
+  // Initialize state for selected tags, ensuring compatibility with older tag data
+  const [selectedTags, setSelectedTags] = useState<string[]>(() => {
+    if (!initialData?.tags) return [];
+    
+    // Filter out any tags that might not be in the current VIBE_TAGS list
+    // This prevents issues with older tags that might have been renamed or removed
+    return initialData.tags.filter(tag => VIBE_TAGS.includes(tag));
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Reflection Questions (from the spec)
@@ -37,11 +43,6 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
 
   // Social links
   const [otherLinks, setOtherLinks] = useState('');
-  const [twitterHandle, setTwitterHandle] = useState(
-    initialData?.contact_links?.twitter 
-      ? initialData.contact_links.twitter.replace('https://twitter.com/', '') 
-      : ''
-  );
   const [linkedinHandle, setLinkedinHandle] = useState(initialData?.contact_links?.linkedin || '');
   const [contactLinks, setContactLinks] = useState<Record<string, string>>(
     initialData?.contact_links || {
@@ -96,18 +97,34 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
   };
 
   const handleTagToggle = (tag: string) => {
+    console.log('Current tags:', selectedTags); // Debug logging
+    
+    // If the tag is already selected, remove it
     if (selectedTags.includes(tag)) {
       setSelectedTags(selectedTags.filter(t => t !== tag));
-    } else if (selectedTags.length < 5) {
-      setSelectedTags([...selectedTags, tag]);
+      console.log('Removed tag:', tag);
+    } 
+    // If we have less than 5 tags or if we're editing a profile with 5+ tags,
+    // allow adding the tag
+    else if (selectedTags.length < 5 || initialData?.tags?.length >= 5) {
+      // If we're at exactly 5 and this is an edit with initially more than 5 tags,
+      // we need to replace one of them
+      if (selectedTags.length >= 5) {
+        // Remove the last tag and add the new one
+        const newTags = [...selectedTags];
+        newTags.pop();
+        newTags.push(tag);
+        setSelectedTags(newTags);
+        console.log('Replaced last tag with:', tag);
+      } else {
+        // Otherwise just add the tag
+        setSelectedTags([...selectedTags, tag]);
+        console.log('Added tag:', tag);
+      }
     }
   };
   
-  const handleTwitterHandleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Strip @ if user entered it
-    const handle = e.target.value.replace('@', '');
-    setTwitterHandle(handle);
-  };
+  // Removed handleTwitterHandleChange as we're now using handleContactLinkChange directly
   
   const handleLinkedinHandleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLinkedinHandle(e.target.value);
@@ -155,10 +172,7 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
       return;
     }
     
-    // Update Twitter handle if provided
-    if (twitterHandle && !contactLinks.twitter) {
-      handleContactLinkChange('twitter', twitterHandle);
-    }
+    // Twitter is now handled directly through contactLinks
     
     // Update LinkedIn handle if provided
     if (linkedinHandle && !contactLinks.linkedin) {
@@ -202,7 +216,6 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
       setSelectedQuestions([0]);
       setLinkedinHandle('');
       setOtherLinks('');
-      setTwitterHandle('');
       setContactLinks({
         twitter: '',
         site: '',
@@ -217,10 +230,7 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+    <div
       className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-lg"
     >
       <h2 className="text-2xl font-bold mb-2">{initialData ? 'Edit Community Profile' : 'Create Your Vibe Profile'}</h2>
@@ -234,12 +244,12 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
             Community Name <span className="text-red-500">*</span>
           </label>
           <input
-            type="text"
-            id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-lily-green focus:border-lily-green"
-            required
+          type="text"
+          id="name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="w-full px-4 py-2.5 border border-pink-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-transparent"
+          required
           />
         </div>
         
@@ -261,18 +271,36 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
           <label htmlFor="logo" className="block text-sm font-medium text-gray-700 mb-1">
             Upload Logo (Optional)
           </label>
-          <input
-            type="file"
-            id="logo"
-            accept="image/*"
-            onChange={handleLogoChange}
-            className="w-full"
-          />
-          {logoUrl && (
-            <div className="mt-2">
-              <img src={logoUrl} alt="Logo preview" className="h-20 w-20 object-contain border rounded" />
-            </div>
-          )}
+          <div className="flex items-center space-x-4">
+            <label className="relative cursor-pointer flex flex-col items-center justify-center w-24 h-24 p-2 rounded-xl bg-gradient-to-r from-pink-200 to-purple-100 border-2 border-dashed border-pink-300 hover:border-pink-400 transition-colors duration-200 shadow-sm overflow-hidden group">
+              <div className="absolute inset-0 bg-white bg-opacity-50 group-hover:bg-opacity-30 transition-opacity duration-200"></div>
+              <div className="absolute -bottom-1 -right-1 w-12 h-12 bg-pink-200 rounded-full opacity-40 blur-md"></div>
+              <span className="text-3xl mb-1 z-10">📷</span>
+              <span className="text-xs text-center font-medium text-pink-600 z-10">Upload Logo</span>
+              <input
+                type="file"
+                id="logo"
+                accept="image/*"
+                onChange={handleLogoChange}
+                className="sr-only"
+              />
+            </label>
+            
+            {logoUrl && (
+              <div className="flex-shrink-0 relative">
+                <div className="w-24 h-24 rounded-xl overflow-hidden border-2 border-pink-300 shadow-md">
+                  <img src={logoUrl} alt="Logo preview" className="w-full h-full object-cover" />
+                </div>
+                <button 
+                  type="button"
+                  onClick={() => setLogoUrl('')}
+                  className="absolute -top-2 -right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-pink-50 transition-colors"
+                >
+                  <span className="text-pink-500 text-xs">&times;</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
         
         {/* Vibe Tags */}
@@ -281,99 +309,114 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
             Select Your Vibe Tags <span className="text-red-500">*</span> ({selectedTags.length}/5)
           </label>
           <div className="flex flex-wrap gap-2">
-            {VIBE_TAGS.map((tag) => (
-              <motion.button
-                key={tag}
-                type="button"
-                className={`px-3 py-1 text-sm rounded-full transition-colors ${
-                  selectedTags.includes(tag)
-                    ? 'bg-lily-green text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                } ${selectedTags.length >= 5 && !selectedTags.includes(tag) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                onClick={() => handleTagToggle(tag)}
-                disabled={selectedTags.length >= 5 && !selectedTags.includes(tag)}
-                whileHover={{ scale: selectedTags.includes(tag) || selectedTags.length < 5 ? 1.05 : 1 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {tag}
-              </motion.button>
-            ))}
+            {VIBE_TAGS.map((tag) => {
+              // Check if selected  
+              const isSelected = selectedTags.includes(tag);
+              // Only disable if not selected AND we're at 5 tags AND this is not an edit of a profile that had 5+ tags
+              const isDisabled = !isSelected && selectedTags.length >= 5 && !(initialData?.tags?.length >= 5);
+              
+              return (
+                <button
+                  key={tag}
+                  type="button"
+                  className={`px-3 py-1.5 text-sm rounded-full shadow-sm transition-all duration-200 ${isSelected 
+                    ? 'bg-pink-500 text-white font-medium' 
+                    : 'bg-white border border-pink-200 text-gray-700 hover:border-pink-300 hover:shadow'} 
+                   ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  onClick={() => handleTagToggle(tag)}
+                  disabled={isDisabled}
+                >
+                  {isSelected && <span className="mr-1">✨</span>}
+                  {tag}
+                </button>
+              );
+            })}
           </div>
         </div>
         
         {/* Reflection Questions */}
         <div>
-          <div className="flex justify-between items-center mb-2">
+          <div className="flex items-center mb-3">
             <label className="block text-sm font-medium text-gray-700">
               Reflection Questions <span className="text-red-500">*</span>
             </label>
-            {reflections.length < 2 && (
-              <button
-                type="button"
-                onClick={addReflection}
-                className="text-sm text-lily-green hover:underline flex items-center"
-              >
-                <span className="mr-1">+</span> Add Question ({reflections.length}/2)
-              </button>
-            )}
+            <span className="text-xs text-gray-500 ml-2">Pick 2 to answer</span>
           </div>
           
-          <div className="space-y-4">
-            {reflections.length < 2 && (
-              <div className="bg-gray-50 p-3 rounded-lg mb-3">
-                <h4 className="text-sm font-medium mb-2">Choose reflection questions:</h4>
-                <div className="space-y-2">
-                  {reflectionQuestions.map((question, i) => (
-                    <div
-                      key={i}
-                      className="p-2 rounded border border-gray-200 hover:border-lily-green cursor-pointer transition-colors"
-                      onClick={() => {
-                        const updatedQuestions = [...selectedQuestions];
-                        updatedQuestions[0] = i;
-                        setSelectedQuestions(updatedQuestions);
-                      }}
-                    >
-                      <p className={`text-sm ${selectedQuestions[0] === i ? 'font-semibold text-lily-green' : 'text-gray-700'}`}>
-                        {selectedQuestions[0] === i && '✓ '}{question}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+          <div className="p-4 rounded-lg bg-gradient-to-r from-pink-50 to-purple-50 border border-pink-100 shadow-sm mb-4">
+            <h4 className="text-sm font-medium mb-3 text-purple-700">Choose your questions:</h4>
             
-            {reflections.map((reflection, index) => (
-              <div key={index} className="bg-gray-50 p-3 rounded-lg">
-                <div className="flex justify-between mb-2">
-                  <button
-                    type="button"
-                    onClick={() => changeQuestion(index)}
-                    className="text-sm text-lily-green hover:underline flex items-center"
-                  >
-                    <span className="mr-1">🔄</span> {reflectionQuestions[selectedQuestions[index]]}
-                  </button>
-                  
-                  {reflections.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeReflection(index)}
-                      className="text-sm text-red-500 hover:underline"
-                    >
-                      Remove
-                    </button>
-                  )}
-                </div>
+            <div className="grid gap-3 mb-4">
+              {reflectionQuestions.map((question, i) => {
+                // Check if this question is already selected
+                const isSelected = selectedQuestions.includes(i);
+                // Get index in the reflections array if selected
+                const reflectionIndex = selectedQuestions.indexOf(i);
                 
-                <textarea
-                  value={reflection}
-                  onChange={(e) => updateReflection(index, e.target.value)}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-lily-green focus:border-lily-green"
-                  placeholder="Share your thoughts..."
-                  required
-                />
-              </div>
-            ))}
+                return (
+                  <div 
+                    key={i}
+                    className={`p-3 rounded-lg transition-all duration-200 ${isSelected 
+                      ? 'bg-white border-2 border-pink-300 shadow-sm' 
+                      : 'bg-white bg-opacity-50 border border-pink-100 hover:border-pink-200'}`}
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <h5 className="text-sm font-medium text-gray-700 flex-1">{question}</h5>
+                      
+                      {isSelected ? (
+                        <button 
+                          type="button" 
+                          onClick={() => removeReflection(reflectionIndex)}
+                          className="text-xs text-red-500 hover:bg-red-50 px-2 py-1 rounded-full"
+                        >
+                          <span className="mr-1">✕</span> Remove
+                        </button>
+                      ) : reflections.length < 2 ? (
+                        <button 
+                          type="button" 
+                          onClick={() => {
+                            // If we have one question already, add this as second
+                            if (reflections.length === 1) {
+                              setReflections([...reflections, '']);
+                              setSelectedQuestions([...selectedQuestions, i]);
+                            } 
+                            // If we have no questions, add this as the first
+                            else if (reflections.length === 0) {
+                              setReflections(['']);
+                              setSelectedQuestions([i]);
+                            }
+                          }}
+                          className="text-xs bg-pink-100 text-pink-600 hover:bg-pink-200 px-2 py-1 rounded-full"
+                        >
+                          <span className="mr-1">+</span> Select
+                        </button>
+                      ) : null}
+                    </div>
+                    
+                    {isSelected && (
+                      <textarea
+                        value={reflections[reflectionIndex]}
+                        onChange={(e) => updateReflection(reflectionIndex, e.target.value)}
+                        rows={3}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-lily-green focus:border-lily-green mt-1"
+                        placeholder="Share your thoughts..."
+                        required
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            
+            <div className="text-center text-sm text-gray-500">
+              {reflections.length === 0 ? (
+                "Select questions to answer"
+              ) : reflections.length === 1 ? (
+                "Select one more question"
+              ) : (
+                "Both questions selected!"
+              )}
+            </div>
           </div>
         </div>
         
@@ -382,22 +425,19 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
           <label className="block text-sm font-medium text-gray-700 mb-2">
             How can others reach you?
           </label>
-          <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
+          <div className="space-y-4 bg-gradient-to-r from-purple-50 to-pink-50 p-5 rounded-lg border border-pink-100 shadow-sm">
             <div>
               <label htmlFor="contactTwitter" className="flex items-center text-xs text-gray-500 mb-1">
                 <span className="mr-1">🐦</span> Twitter
               </label>
-              <div className="flex items-center">
-                <span className="text-gray-500 mr-2">@</span>
-                <input
-                  type="text"
-                  id="contactTwitter"
-                  value={twitterHandle}
-                  onChange={handleTwitterHandleChange}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-lily-green focus:border-lily-green"
-                  placeholder="your_community"
-                />
-              </div>
+              <input
+                type="url"
+                id="contactTwitter"
+                value={contactLinks.twitter}
+                onChange={(e) => handleContactLinkChange('twitter', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-lily-green focus:border-lily-green"
+                placeholder="https://twitter.com/your_community"
+              />
             </div>
             
             <div>
@@ -449,23 +489,22 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
           <button
             type="button"
             onClick={() => window.location.href = '/'}
-            className="px-4 py-2 text-gray-600 hover:text-lily-green transition-colors"
+            className="px-4 py-2 text-purple-500 hover:text-pink-500 transition-colors flex items-center"
           >
-            ← Back to Pond
+            <span className="mr-1">←</span>
+            <span>Back to Pond</span>
           </button>
           
-          <motion.button
+          <button
             type="submit"
-            className="px-6 py-3 bg-lily-green text-white font-medium rounded-md shadow-lg hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lily-green disabled:opacity-50 flex items-center"
+            className="px-6 py-3 bg-pink-500 text-white font-medium rounded-full shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 disabled:opacity-50 flex items-center"
             disabled={isSubmitting}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.98 }}
           >
             <span className="mr-2">{isSubmitting ? '⏳ Saving...' : initialData ? '💾 Save Changes' : '✨ Create Community'}</span>
-            {!isSubmitting && <span className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded">{initialData ? 'Update' : 'Create'}</span>}
-          </motion.button>
+            {!isSubmitting && <span className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">{initialData ? 'Update' : 'Create'}</span>}
+          </button>
         </div>
       </form>
-    </motion.div>
+    </div>
   );
 }
