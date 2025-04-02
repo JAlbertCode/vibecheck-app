@@ -97,7 +97,7 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
           return node.classList && node.classList.contains('download-ignore');
         },
         // Critical for getting exact pixel-perfect image
-        onclone: (document, element) => {
+        onclone: (doc: Document, element: Element) => {
           // We need to ensure all elements maintain their positions
           const allNodes = element.querySelectorAll('*');
           allNodes.forEach(node => {
@@ -299,7 +299,7 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
           return node.classList && node.classList.contains('download-ignore');
         },
         // Critical for getting exact pixel-perfect image
-        onclone: (document, element) => {
+        onclone: (doc: Document, element: Element) => {
           // We need to ensure all elements maintain their positions
           const allNodes = element.querySelectorAll('*');
           allNodes.forEach(node => {
@@ -361,7 +361,7 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
           return node.classList && node.classList.contains('download-ignore');
         },
         // Critical for getting exact pixel-perfect image
-        onclone: (document, element) => {
+        onclone: (doc: Document, element: Element) => {
           // We need to ensure all elements maintain their positions
           const allNodes = element.querySelectorAll('*');
           allNodes.forEach(node => {
