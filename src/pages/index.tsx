@@ -306,6 +306,7 @@ export default function Home() {
                 selectedFrog={myFrog}
                 onSelectFrog={handleSelectCompareFrog}
                 onEditFrog={handleEditFrog}
+                onCompareFrogs={handleCompareMultiple}
               />
             </div>
           </div>
