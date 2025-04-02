@@ -16,15 +16,22 @@ export default function FrogGrid({ frogs, selectedFrog, onSelectFrog, onCompareF
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedFrogs, setSelectedFrogs] = useState<Frog[]>([]);
   
+  // Sort frogs alphabetically by name
+  const sortedFrogs = useMemo(() => 
+    [...frogs].sort((a, b) => a.name.localeCompare(b.name)),
+    [frogs]
+  );
+  
   // Get all unique tags from all communities
   const allTags = Array.from(
     new Set(
-      frogs.flatMap(frog => frog.tags)
+      sortedFrogs.flatMap(frog => frog.tags)
     )
   ).sort();
 
   // Filter frogs based on search and tags
-  const filteredFrogs = frogs.filter(frog => {
+  // Filter frogs based on search and tags
+  const filteredFrogs = sortedFrogs.filter(frog => {
     // Skip the currently selected frog (if any)
     if (selectedFrog && frog.id === selectedFrog.id) return false;
     

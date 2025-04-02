@@ -348,7 +348,7 @@ export default function Home() {
       
       <div className="container mx-auto px-4 py-6">
         {/* Title area */}
-        {(currentStep === 'SELECT_FROG' || currentStep === 'CREATE_FROG') && (
+        {(currentStep === 'CREATE_FROG') && (
           <div className="mb-12 text-center">
             <motion.h1 
               className="text-4xl font-bold mb-4"
@@ -356,7 +356,7 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              {currentStep === 'CREATE_FROG' ? (editingFrog ? 'Edit Community Profile' : 'Create Your Community') : 'VibeCheck'}
+              {currentStep === 'CREATE_FROG' ? (editingFrog ? 'Edit Community Profile' : 'Create Your Community') : 'Select Your Community'}
             </motion.h1>
             <motion.p 
               className="text-xl text-gray-600 max-w-2xl mx-auto"

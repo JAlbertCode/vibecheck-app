@@ -10,22 +10,13 @@ export default function Header() {
   return (
     <header className="bg-gradient-to-r from-pink-400 via-purple-300 to-pink-300 py-4 mb-8 shadow-md">
       <div className="container mx-auto px-4 flex justify-between items-center">
-        <div className="flex items-center">
-          <motion.div 
-            className="flex items-center justify-center w-12 h-12 rounded-full bg-white shadow-lg mr-3"
-            animate={{ 
-              scale: [1, 1.05, 1],
-              rotate: [0, 5, -5, 0]
-            }}
-            transition={{ duration: 3, repeat: Infinity, repeatType: 'loop' }}
-          >
-            <span className="text-2xl">🐸</span>
-          </motion.div>
+        <Link href="/" className="flex items-center">
+
           <div>
             <h1 className="text-2xl font-bold text-white drop-shadow-sm">VibeCheck</h1>
             <p className="text-xs text-white text-opacity-80">Match your community's vibe!</p>
           </div>
-        </div>
+        </Link>
         
         <nav className="flex items-center space-x-4">
           <Link 
@@ -34,12 +25,7 @@ export default function Header() {
           >
             Home
           </Link>
-          <Link 
-            href="/pond" 
-            className="px-4 py-2 bg-white bg-opacity-30 rounded-full text-white font-medium hover:bg-opacity-40 transition-colors shadow-sm"
-          >
-            The Pond
-          </Link>
+
         </nav>
       </div>
       
