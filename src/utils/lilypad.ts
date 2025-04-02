@@ -114,8 +114,8 @@ export async function compareVibes(frogA: Frog, frogB: Frog): Promise<VibeMatch>
       const frogBTags = new Set(frogB.tags.map(tag => tag.toLowerCase()));
       
       // Calculate Jaccard similarity (intersection / union)
-      const intersection = new Set([...frogATags].filter(tag => frogBTags.has(tag)));
-      const union = new Set([...frogATags, ...frogBTags]);
+      const intersection = new Set(Array.from(frogATags).filter(tag => frogBTags.has(tag)));
+      const union = new Set([...Array.from(frogATags), ...Array.from(frogBTags)]);
       
       // Convert to a score between 0-40
       const tagSimilarity = Math.round((intersection.size / union.size) * 40);
@@ -128,8 +128,8 @@ export async function compareVibes(frogA: Frog, frogB: Frog): Promise<VibeMatch>
       const bioWordsSetA = new Set(bioWordsA);
       const bioWordsSetB = new Set(bioWordsB);
       
-      const bioIntersection = new Set([...bioWordsSetA].filter(word => bioWordsSetB.has(word)));
-      const bioUnion = new Set([...bioWordsSetA, ...bioWordsSetB]);
+      const bioIntersection = new Set(Array.from(bioWordsSetA).filter(word => bioWordsSetB.has(word)));
+      const bioUnion = new Set([...Array.from(bioWordsSetA), ...Array.from(bioWordsSetB)]);
       
       // Convert to a score between 0-20
       const bioSimilarity = Math.round((bioIntersection.size / Math.max(1, bioUnion.size)) * 20);
@@ -142,7 +142,7 @@ export async function compareVibes(frogA: Frog, frogB: Frog): Promise<VibeMatch>
       const reflectionWordsSetA = new Set(reflectionWordsA);
       const reflectionWordsSetB = new Set(reflectionWordsB);
       
-      const reflectionIntersection = new Set([...reflectionWordsSetA].filter(word => reflectionWordsSetB.has(word)));
+      const reflectionIntersection = new Set(Array.from(reflectionWordsSetA).filter(word => reflectionWordsSetB.has(word)));
       
       // 0-20 points for word overlap
       const reflectionOverlap = Math.min(20, reflectionIntersection.size * 4);
@@ -154,9 +154,9 @@ export async function compareVibes(frogA: Frog, frogB: Frog): Promise<VibeMatch>
       const communityTerms = ['community', 'people', 'members', 'together', 'collaborative'];
       
       // Check if communities have complementary skills/focus
-      const hasBuilderFocus = [...reflectionWordsSetA, ...reflectionWordsSetB].some(word => buildTerms.includes(word));
-      const hasDesignFocus = [...reflectionWordsSetA, ...reflectionWordsSetB].some(word => designTerms.includes(word));
-      const hasCommunityFocus = [...reflectionWordsSetA, ...reflectionWordsSetB].some(word => communityTerms.includes(word));
+      const hasBuilderFocus = [...Array.from(reflectionWordsSetA), ...Array.from(reflectionWordsSetB)].some(word => buildTerms.includes(word));
+      const hasDesignFocus = [...Array.from(reflectionWordsSetA), ...Array.from(reflectionWordsSetB)].some(word => designTerms.includes(word));
+      const hasCommunityFocus = [...Array.from(reflectionWordsSetA), ...Array.from(reflectionWordsSetB)].some(word => communityTerms.includes(word));
       
       if ((hasBuilderFocus && hasDesignFocus) || (hasBuilderFocus && hasCommunityFocus) || (hasDesignFocus && hasCommunityFocus)) {
         complementaryBonus = 10;
