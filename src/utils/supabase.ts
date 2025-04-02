@@ -15,7 +15,9 @@ try {
   // Provide a mock client with the same interface
   supabaseClient = {
     from: () => ({
-      insert: () => ({ select: () => ({ data: [], error: null }) }),
+      insert: () => ({ 
+        select: () => ({ data: [], error: null }) 
+      }),
       update: () => ({ 
         eq: () => ({ 
           select: () => ({ data: [], error: null }), 
@@ -23,8 +25,16 @@ try {
           error: null 
         }) 
       }),
-      select: () => ({ data: [], error: null }),
-      eq: () => ({ single: () => ({ data: null, error: null }) })
+      select: () => ({ 
+        eq: () => ({ 
+          single: () => ({ data: null, error: null })
+        }),
+        data: [], 
+        error: null 
+      }),
+      eq: () => ({ 
+        single: () => ({ data: null, error: null }) 
+      })
     })
   };
 }
