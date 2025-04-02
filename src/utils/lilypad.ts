@@ -306,7 +306,9 @@ Keep everything friendly, specific and brief - this is for sharing on social med
     
     // Parse the response - in a real implementation, we would handle errors better
     const content = data.choices[0].message.content;
-    const jsonMatch = content.match(/({.*})/s);
+    // Use a different regex pattern that doesn't require the 's' flag
+    // This will match JSON objects even across multiple lines
+    const jsonMatch = content.match(/({[\s\S]*})/);
     
     if (jsonMatch) {
       return JSON.parse(jsonMatch[0]) as VibeMatch;
