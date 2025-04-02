@@ -26,21 +26,16 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
   const reflectionQuestions = [
     "What kind of thing would your community love to co-create?",
     "What types of vibes don't mix well with yours?",
-    "What makes you feel connected to another community?"
+    "What makes you feel connected to another community?",
+    "What's your community's superpower?",
+    "What's your community's biggest challenge?"
   ];
   
   // Set initial reflections from existing data
   const [reflections, setReflections] = useState<string[]>(
-    initialData?.reflections && initialData.reflections.length > 0 
-      ? initialData.reflections
-      : ['']
+    initialData?.reflections || Array(5).fill('')
   );
   
-  // Selected reflection questions
-  const [selectedQuestions, setSelectedQuestions] = useState<number[]>(
-    reflections.map((_, index) => index % reflectionQuestions.length)
-  );
-
   // Social links
   const [otherLinks, setOtherLinks] = useState('');
   const [linkedinHandle, setLinkedinHandle] = useState(initialData?.contact_links?.linkedin || '');
@@ -57,50 +52,6 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
       linkedin: ''
     }
   );
-
-  // Add a new reflection with a random question
-  const addReflection = () => {
-    if (reflections.length < 2) { // Limit to exactly 2 questions as per spec
-      // Choose a random question that hasn't been selected yet
-      const availableQuestions = reflectionQuestions
-        .map((_, index) => index)
-        .filter(index => !selectedQuestions.includes(index));
-      
-      const newQuestionIndex = availableQuestions.length > 0
-        ? availableQuestions[Math.floor(Math.random() * availableQuestions.length)]
-        : Math.floor(Math.random() * reflectionQuestions.length);
-      
-      setReflections([...reflections, '']);
-      setSelectedQuestions([...selectedQuestions, newQuestionIndex]);
-    }
-  };
-  
-  // Update a reflection at a specific index
-  const updateReflection = (index: number, value: string) => {
-    const updatedReflections = [...reflections];
-    updatedReflections[index] = value;
-    setReflections(updatedReflections);
-  };
-  
-  // Remove a reflection at a specific index
-  const removeReflection = (index: number) => {
-    if (reflections.length > 1) {
-      const updatedReflections = [...reflections];
-      updatedReflections.splice(index, 1);
-      setReflections(updatedReflections);
-      
-      const updatedQuestions = [...selectedQuestions];
-      updatedQuestions.splice(index, 1);
-      setSelectedQuestions(updatedQuestions);
-    }
-  };
-  
-  // Change the question for a specific reflection
-  const changeQuestion = (index: number) => {
-    const updatedQuestions = [...selectedQuestions];
-    updatedQuestions[index] = (updatedQuestions[index] + 1) % reflectionQuestions.length;
-    setSelectedQuestions(updatedQuestions);
-  };
 
   const handleTagToggle = (tag: string) => {
     console.log('Current tags:', selectedTags); // Debug logging
@@ -173,29 +124,13 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
     if (isSubmitting) return;
     
     // Validation
-    if (!name || !bio || selectedTags.length === 0 || reflections.some(r => !r.trim())) {
-      alert('Please fill out all required fields (Community Name, Bio, Vibe Tags, and Reflection Questions)');
+    if (!name || !bio || selectedTags.length === 0) {
+      alert('Please fill out all required fields (Community Name, Bio, and Vibe Tags)');
       return;
     }
     
-    // Twitter is now handled directly through contactLinks
-    
-    // Update LinkedIn handle if provided
-    if (linkedinHandle && !contactLinks.linkedin) {
-      handleContactLinkChange('linkedin', linkedinHandle.includes('linkedin.com') ? 
-        linkedinHandle : `https://linkedin.com/company/${linkedinHandle}`);
-    }
-    
-    // Update other links if provided
-    if (otherLinks) {
-      // Split by line breaks and add each link to contactLinks
-      const links = otherLinks.split('\n').filter(link => link.trim());
-      links.forEach((link, index) => {
-        if (link.trim()) {
-          handleContactLinkChange(`other_${index}`, link.trim());
-        }
-      });
-    }
+    // Filter out empty reflections
+    const nonEmptyReflections = reflections.filter(r => r.trim());
     
     // Default logo URL if none provided
     const finalLogoUrl = logoUrl || `https://via.placeholder.com/100/00cc88/ffffff?text=${name.charAt(0)}`;
@@ -208,7 +143,7 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
         bio,
         logo_url: finalLogoUrl,
         tags: selectedTags,
-        reflections: reflections.filter(r => r.trim()),
+        reflections: nonEmptyReflections,
         contact_links: contactLinks
       });
       
@@ -218,8 +153,7 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
       setLogoUrl('');
       setLogoFile(null);
       setSelectedTags([]);
-      setReflections(['']);
-      setSelectedQuestions([0]);
+      setReflections(Array(5).fill(''));
       setLinkedinHandle('');
       setOtherLinks('');
       setContactLinks({
@@ -240,7 +174,7 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
       className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-lg"
     >
       <h2 className="text-2xl font-bold mb-2">{initialData ? 'Edit Community Profile' : 'Create Your Vibe Profile'}</h2>
-      <p className="text-gray-500 mb-6">Tell us about your community's vibe so we can match you with others! 🐸<br/>
+      <p className="text-gray-500 mb-6">Tell us about your community's vibe so we can match you with others! 🌟<br/>
         <span className="text-xs">Anyone can edit profiles - this is like a Wiki for Web3 communities.</span></p>
       
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -278,9 +212,9 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
             Upload Logo (Optional)
           </label>
           <div className="flex items-center space-x-4">
-            <label className="relative cursor-pointer flex flex-col items-center justify-center w-24 h-24 p-2 rounded-xl bg-gradient-to-r from-pink-200 to-purple-100 border-2 border-dashed border-pink-300 hover:border-pink-400 transition-colors duration-200 shadow-sm overflow-hidden group">
+            <label className="relative cursor-pointer flex flex-col items-center justify-center w-24 h-24 p-2 rounded-xl bg-gradient-to-r from-pink-50 to-purple-50 border-2 border-dashed border-pink-200 hover:border-pink-300 transition-colors duration-200 shadow-sm overflow-hidden group">
               <div className="absolute inset-0 bg-white bg-opacity-50 group-hover:bg-opacity-30 transition-opacity duration-200"></div>
-              <div className="absolute -bottom-1 -right-1 w-12 h-12 bg-pink-200 rounded-full opacity-40 blur-md"></div>
+              <div className="absolute -bottom-1 -right-1 w-12 h-12 bg-pink-100 rounded-full opacity-40 blur-md"></div>
               <span className="text-3xl mb-1 z-10">📷</span>
               <span className="text-xs text-center font-medium text-pink-600 z-10">Upload Logo</span>
               <input
@@ -294,8 +228,8 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
             
             {logoUrl && (
               <div className="flex-shrink-0 relative">
-                <div className="w-24 h-24 rounded-xl overflow-hidden border-2 border-pink-300 shadow-md">
-                  <img src={logoUrl} alt="Logo preview" className="w-full h-full object-cover" />
+                <div className="w-24 h-24 rounded-xl overflow-hidden border-2 border-pink-200 shadow-md bg-gradient-to-br from-pink-50 to-purple-50">
+                  <img src={logoUrl} alt="Logo preview" className="w-full h-full object-contain p-2" />
                 </div>
                 <button 
                   type="button"
@@ -326,8 +260,8 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
                   key={tag}
                   type="button"
                   className={`px-3 py-1.5 text-sm rounded-full shadow-sm transition-all duration-200 ${isSelected 
-                    ? 'bg-pink-500 text-white font-medium' 
-                    : 'bg-white border border-pink-200 text-gray-700 hover:border-pink-300 hover:shadow'} 
+                    ? 'bg-gradient-to-r from-pink-50 to-purple-50 text-pink-600 font-medium border border-pink-200' 
+                    : 'bg-white border border-pink-100 text-gray-700 hover:border-pink-200 hover:shadow'} 
                    ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
                   onClick={() => handleTagToggle(tag)}
                   disabled={isDisabled}
@@ -344,84 +278,32 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
         <div>
           <div className="flex items-center mb-3">
             <label className="block text-sm font-medium text-gray-700">
-              Reflection Questions <span className="text-red-500">*</span>
+              Reflection Questions (Optional)
             </label>
-            <span className="text-xs text-gray-500 ml-2">Pick 2 to answer</span>
+            <span className="text-xs text-gray-500 ml-2">Share your community's thoughts</span>
           </div>
           
           <div className="p-4 rounded-lg bg-gradient-to-r from-pink-50 to-purple-50 border border-pink-100 shadow-sm mb-4">
-            <h4 className="text-sm font-medium mb-3 text-purple-700">Choose your questions:</h4>
-            
-            <div className="grid gap-3 mb-4">
-              {reflectionQuestions.map((question, i) => {
-                // Check if this question is already selected
-                const isSelected = selectedQuestions.includes(i);
-                // Get index in the reflections array if selected
-                const reflectionIndex = selectedQuestions.indexOf(i);
-                
-                return (
-                  <div 
-                    key={i}
-                    className={`p-3 rounded-lg transition-all duration-200 ${isSelected 
-                      ? 'bg-white border-2 border-pink-300 shadow-sm' 
-                      : 'bg-white bg-opacity-50 border border-pink-100 hover:border-pink-200'}`}
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <h5 className="text-sm font-medium text-gray-700 flex-1">{question}</h5>
-                      
-                      {isSelected ? (
-                        <button 
-                          type="button" 
-                          onClick={() => removeReflection(reflectionIndex)}
-                          className="text-xs text-red-500 hover:bg-red-50 px-2 py-1 rounded-full"
-                        >
-                          <span className="mr-1">✕</span> Remove
-                        </button>
-                      ) : reflections.length < 2 ? (
-                        <button 
-                          type="button" 
-                          onClick={() => {
-                            // If we have one question already, add this as second
-                            if (reflections.length === 1) {
-                              setReflections([...reflections, '']);
-                              setSelectedQuestions([...selectedQuestions, i]);
-                            } 
-                            // If we have no questions, add this as the first
-                            else if (reflections.length === 0) {
-                              setReflections(['']);
-                              setSelectedQuestions([i]);
-                            }
-                          }}
-                          className="text-xs bg-pink-100 text-pink-600 hover:bg-pink-200 px-2 py-1 rounded-full"
-                        >
-                          <span className="mr-1">+</span> Select
-                        </button>
-                      ) : null}
-                    </div>
-                    
-                    {isSelected && (
-                      <textarea
-                        value={reflections[reflectionIndex]}
-                        onChange={(e) => updateReflection(reflectionIndex, e.target.value)}
-                        rows={3}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-lily-green focus:border-lily-green mt-1"
-                        placeholder="Share your thoughts..."
-                        required
-                      />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-            
-            <div className="text-center text-sm text-gray-500">
-              {reflections.length === 0 ? (
-                "Select questions to answer"
-              ) : reflections.length === 1 ? (
-                "Select one more question"
-              ) : (
-                "Both questions selected!"
-              )}
+            <div className="grid gap-3">
+              {reflectionQuestions.map((question, i) => (
+                <div 
+                  key={i}
+                  className="p-3 rounded-lg bg-white border border-pink-100 hover:border-pink-200 transition-all duration-200"
+                >
+                  <h5 className="text-sm font-medium text-gray-700 mb-2">{question}</h5>
+                  <textarea
+                    value={reflections[i]}
+                    onChange={(e) => setReflections(prev => {
+                      const updatedReflections = [...prev];
+                      updatedReflections[i] = e.target.value;
+                      return updatedReflections;
+                    })}
+                    rows={2}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-lily-green focus:border-lily-green"
+                    placeholder="Share your thoughts..."
+                  />
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -431,7 +313,7 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
           <label className="block text-sm font-medium text-gray-700 mb-2">
             How can others reach you?
           </label>
-          <div className="space-y-4 bg-gradient-to-r from-purple-50 to-pink-50 p-5 rounded-lg border border-pink-100 shadow-sm">
+          <div className="space-y-4 bg-gradient-to-r from-pink-50 to-purple-50 p-5 rounded-lg border border-pink-100 shadow-sm">
             <div>
               <label htmlFor="contactTwitter" className="flex items-center text-xs text-gray-500 mb-1">
                 <span className="mr-1">🐦</span> Twitter
@@ -503,11 +385,10 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
           
           <button
             type="submit"
-            className="px-6 py-3 bg-pink-500 text-white font-medium rounded-full shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 disabled:opacity-50 flex items-center"
+            className="px-6 py-3 bg-gradient-to-r from-pink-50 to-purple-50 text-pink-600 font-medium rounded-full shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-200 disabled:opacity-50 flex items-center"
             disabled={isSubmitting}
           >
             <span className="mr-2">{isSubmitting ? '⏳ Saving...' : initialData ? '💾 Save Changes' : '✨ Create Community'}</span>
-            {!isSubmitting && <span className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">{initialData ? 'Update' : 'Create'}</span>}
           </button>
         </div>
       </form>

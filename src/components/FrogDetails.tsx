@@ -12,19 +12,31 @@ interface FrogDetailsProps {
 }
 
 export default function FrogDetails({ isOpen, onClose, frog, onEditFrog, onSelectFrog }: FrogDetailsProps) {
-  if (!frog) return null;
-  
-  // Generate default logo image if needed
-  const [logoImage, setLogoImage] = useState<string>(frog.logo_url || '');
-  
+  const [mounted, setMounted] = useState(false);
+  const [logoImage, setLogoImage] = useState<string>('');
+
   useEffect(() => {
-    if (!frog.logo_url || frog.logo_url.includes('placeholder.com')) {
-      setLogoImage(getDefaultImage(frog.name));
-    } else {
-      setLogoImage(frog.logo_url);
+    setMounted(true);
+    if (frog) {
+      if (!frog.logo_url || frog.logo_url.includes('placeholder.com')) {
+        setLogoImage(getDefaultImage(frog.name));
+      } else {
+        setLogoImage(frog.logo_url);
+      }
     }
   }, [frog]);
 
+  if (!frog || !mounted) return null;
+  
+  // Add detailed debugging
+  console.log('Frog image_url:', frog.image_url);
+  console.log('Frog logo_url:', frog.logo_url);
+  console.log('Condition check:', {
+    hasImageUrl: !!frog.image_url,
+    imageUrlNotEmpty: frog.image_url !== '',
+    fullCondition: frog.image_url && frog.image_url !== ''
+  });
+  
   // Handle checking vibes
   const handleCheckVibes = () => {
     onClose();
@@ -103,33 +115,35 @@ export default function FrogDetails({ isOpen, onClose, frog, onEditFrog, onSelec
             
             {/* Community image and bio */}
             <div className="flex flex-col md:flex-row gap-4 mb-6">
-              <div className="flex-shrink-0">
-                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-lily-green relative">
-                  {frog.image_url ? (
-                    <img
-                      src={frog.image_url}
-                      alt={`${frog.name} frog`}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
+              <div className="flex-shrink-0 flex items-center justify-center">
+                <div className="w-36 h-36 rounded-full overflow-hidden border-4 border-lily-green relative">
+                  {(!logoImage || logoImage === '') ? (
                     <div className="w-full h-full bg-gradient-to-br from-lily-green to-blue-400 flex items-center justify-center text-white text-4xl font-bold">
                       <span className="text-4xl">
                         {["🐸", "🦋", "🪷", "🌿", "✨", "🌊", "🧩", "🎮", "🚀", "🔮", "🧠", "🎨", "🔧", "🌱", "🧪", "💫", "🪄", "🧬", "🪴", "🐙", "🦄", "🦎", "🐝", "🐬", "🐢", "🦚"][frog.name.charCodeAt(0) % 26]}
                       </span>
                     </div>
+                  ) : (
+                    <>
+                      <div className="w-full h-full p-2 bg-gradient-to-br from-lily-green to-blue-400">
+                        <img
+                          src={logoImage}
+                          alt={`${frog.name} logo`}
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                      {/* Main image overlay only when we have a logo */}
+                      {frog.image_url && frog.image_url !== '' && (
+                        <div className="absolute -bottom-4 -right-1 w-14 h-14 rounded-full bg-gradient-to-br from-lily-green to-blue-400 p-1 border-2 border-lily-green shadow">
+                          <img
+                            src={frog.image_url}
+                            alt={`${frog.name} frog`}
+                            className="w-full h-full object-cover rounded-full"
+                          />
+                        </div>
+                      )}
+                    </>
                   )}
-                  
-                  {/* Logo overlay */}
-                  <div className="absolute bottom-0 right-0 w-12 h-12 rounded-full bg-white p-1 border-2 border-lily-green shadow">
-                    <img
-                      src={logoImage}
-                      alt={`${frog.name} logo`}
-                      className="w-full h-full object-contain rounded-full"
-                      onError={() => {
-                        setLogoImage(getDefaultImage(frog.name));
-                      }}
-                    />
-                  </div>
                 </div>
               </div>
               
@@ -166,66 +180,47 @@ export default function FrogDetails({ isOpen, onClose, frog, onEditFrog, onSelec
             </div>
             
             {/* Contact Links */}
-            {contactLinks.length > 0 && (
-              <div>
-                <h3 className="text-lg font-medium mb-3">Connect</h3>
-                <div className="flex flex-wrap gap-2">
-                  {contactLinks.map((link, index) => (
-                    link && (
-                      <a
-                        key={index}
-                        href={link.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 text-gray-700 hover:bg-lily-green hover:text-white rounded-full transition-colors"
-                      >
-                        <span>{link.icon}</span>
-                        <span>{link.label}</span>
-                      </a>
-                    )
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {/* Footer with action buttons */}
-            <div className="mt-6 space-y-4">
-              <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-lg font-medium mb-3">Connect</h3>
+              <div className="flex flex-wrap gap-2">
                 <button
                   onClick={handleCheckVibes}
-                  className="w-full px-4 py-3 bg-lily-green text-white font-semibold rounded-md shadow-sm hover:bg-opacity-90 focus:outline-none transition-colors"
+                  className="flex items-center gap-1 px-3 py-1.5 bg-lily-green text-white hover:bg-opacity-90 rounded-full transition-colors"
                 >
-                  Check Vibes with This Community
+                  <span>✨</span>
+                  <span>Check Vibes</span>
                 </button>
-              </div>
-              
-              <div className="flex justify-between items-center gap-4">
-                {onEditFrog && (
-                  <button
-                    onClick={() => {
-                      onClose();
-                      onEditFrog(frog);
-                    }}
-                    className="flex-1 px-4 py-2 border border-lily-green text-lily-green font-medium rounded-md hover:bg-lily-green hover:text-white focus:outline-none transition-colors"
-                  >
-                    Edit Community
-                  </button>
-                )}
-                
-                {onSelectFrog && (
-                  <button
-                    onClick={() => {
-                      onClose();
-                      // Also trigger the regular select functionality for direct comparison
-                      onSelectFrog(frog);
-                    }}
-                    className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 font-medium rounded-md shadow-sm hover:bg-gray-300 focus:outline-none transition-colors"
-                  >
-                    Select (No Vibe Check)
-                  </button>
-                )}
+                {contactLinks.map((link, index) => (
+                  link && (
+                    <a
+                      key={index}
+                      href={link.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 text-gray-700 hover:bg-lily-green hover:text-white rounded-full transition-colors"
+                    >
+                      <span>{link.icon}</span>
+                      <span>{link.label}</span>
+                    </a>
+                  )
+                ))}
               </div>
             </div>
+            
+            {/* Footer with edit button */}
+            {onEditFrog && (
+              <div className="mt-6 flex justify-center">
+                <button
+                  onClick={() => {
+                    onClose();
+                    onEditFrog(frog);
+                  }}
+                  className="px-6 py-2 border border-lily-green text-lily-green font-medium rounded-full hover:bg-lily-green hover:text-white focus:outline-none transition-colors"
+                >
+                  Edit
+                </button>
+              </div>
+            )}
           </motion.div>
         </motion.div>
       )}

@@ -147,19 +147,6 @@ export default function FrogGrid({ frogs, selectedFrog, onSelectFrog, onEditFrog
             }}
           >
             
-            {/* Edit button */}
-            {onEditFrog && (
-              <div 
-                className="absolute top-2 left-2 z-20 w-7 h-7 rounded-full bg-white hover:bg-lily-green shadow flex items-center justify-center cursor-pointer transition-colors duration-200 border border-gray-200 hover:border-transparent"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEditFrog(frog);
-                }}
-              >
-                <span className="text-gray-500 hover:text-white transition-colors text-sm">✎</span>
-              </div>
-            )}
-            
             {/* Logo */}
             <div className="w-full aspect-square bg-white flex items-center justify-center p-4 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-pink-100 to-purple-100 z-0"></div>

@@ -29,7 +29,7 @@ export default function FrogSelection({ frogs, onSelectFrog, onCreateNew }: Frog
         <h3 className="font-bold text-lg mb-4">Why create a community profile?</h3>
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 flex items-start space-x-2">
-            <div className="bg-lily-green bg-opacity-10 w-8 h-8 rounded-full flex items-center justify-center text-lg shrink-0">
+            <div className="bg-gradient-to-r from-pink-50 to-purple-50 w-8 h-8 rounded-full flex items-center justify-center text-lg shrink-0 border border-pink-200">
               👥
             </div>
             <div>
@@ -39,7 +39,7 @@ export default function FrogSelection({ frogs, onSelectFrog, onCreateNew }: Frog
           </div>
           
           <div className="flex-1 flex items-start space-x-2">
-            <div className="bg-lily-green bg-opacity-10 w-8 h-8 rounded-full flex items-center justify-center text-lg shrink-0">
+            <div className="bg-gradient-to-r from-pink-50 to-purple-50 w-8 h-8 rounded-full flex items-center justify-center text-lg shrink-0 border border-pink-200">
               💼
             </div>
             <div>
@@ -49,7 +49,7 @@ export default function FrogSelection({ frogs, onSelectFrog, onCreateNew }: Frog
           </div>
           
           <div className="flex-1 flex items-start space-x-2">
-            <div className="bg-lily-green bg-opacity-10 w-8 h-8 rounded-full flex items-center justify-center text-lg shrink-0">
+            <div className="bg-gradient-to-r from-pink-50 to-purple-50 w-8 h-8 rounded-full flex items-center justify-center text-lg shrink-0 border border-pink-200">
               💻
             </div>
             <div>
@@ -67,7 +67,7 @@ export default function FrogSelection({ frogs, onSelectFrog, onCreateNew }: Frog
             placeholder="Search for your community..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-lily-green focus:border-transparent pl-10"
+            className="w-full px-4 py-2 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-200 focus:border-transparent pl-10"
           />
           <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
             🔍
@@ -76,27 +76,27 @@ export default function FrogSelection({ frogs, onSelectFrog, onCreateNew }: Frog
         
         <motion.button
           onClick={onCreateNew}
-          className="px-4 py-2 bg-lily-green text-white font-medium rounded-full shadow hover:bg-opacity-90 focus:outline-none flex items-center"
+          className="px-4 py-2 bg-gradient-to-r from-pink-50 to-purple-50 text-pink-600 font-medium rounded-full shadow hover:shadow-md focus:outline-none flex items-center border border-pink-200"
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.98 }}
         >
           <span className="mr-1">➕</span>
-          <span>New Frog</span>
+          <span>New Community</span>
         </motion.button>
       </div>
       
-      {/* Frogs grid */}
+      {/* Communities grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         {filteredFrogs.map(frog => (
           <motion.div
             key={frog.id}
-            className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 hover:shadow-md hover:border-lily-green transition-all cursor-pointer"
+            className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 hover:shadow-md hover:border-pink-200 transition-all cursor-pointer"
             whileHover={{ y: -5 }}
             onClick={() => onSelectFrog(frog)}
           >
             <div className="flex items-center p-3">
               {/* Logo */}
-              <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center mr-3 overflow-hidden border border-gray-100">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-pink-50 to-purple-50 flex items-center justify-center mr-3 overflow-hidden border border-pink-200">
                 <img 
                   src={frog.logo_url || getDefaultImage(frog.name)} 
                   alt={`${frog.name} logo`} 
@@ -123,7 +123,7 @@ export default function FrogSelection({ frogs, onSelectFrog, onCreateNew }: Frog
           <p className="text-gray-500">No communities found matching "{searchQuery}"</p>
           <button
             onClick={onCreateNew}
-            className="mt-4 px-4 py-2 bg-lily-green text-white font-medium rounded-full shadow hover:bg-opacity-90 focus:outline-none inline-flex items-center"
+            className="mt-4 px-4 py-2 bg-gradient-to-r from-pink-50 to-purple-50 text-pink-600 font-medium rounded-full shadow hover:shadow-md focus:outline-none inline-flex items-center border border-pink-200"
           >
             <span className="mr-1">➕</span>
             <span>Create "{searchQuery}"</span>
