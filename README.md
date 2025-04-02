@@ -1,20 +1,19 @@
-# VibeCheck 🐸
+# VibeCheck
 
-A fun, shareable browser dApp where communities can create vibe profiles (as frogs), compare them with others, and receive a Lilypad-powered vibe match + suggested ways to collaborate.
+A fun, shareable browser dApp where communities can create vibe profiles, compare them with others, and receive a Lilypad-powered vibe match + suggested ways to collaborate.
 
 ## 🎯 Core MVP Functionality
 
-- ✅ **Create a Vibe Profile (aka "your frog")**
+- ✅ **Create a Vibe Profile**
   - Community Name, Bio, Logo Upload (optional)
-  - Select 5 Vibe Tags with emojis
+  - Select 5 Vibe Tags
   - Answer reflection questions to understand your community's values and preferences
   - Provide contact links (Twitter, LinkedIn, Website, and other links)
 
-- ✅ **Browse + Compare ("The Pond")**
+- ✅ **Browse + Compare**
   - Grid view of all communities with filtering
-  - View detailed information before comparing (NEW!)
+  - View detailed information before comparing
   - Select your community first, then browse others
-  - Multi-select capabilities for future multi-frog comparison
   - Get AI-powered match results via Lilypad's phi4:14b model
 
 - ✅ **Shareable Output**
@@ -48,11 +47,11 @@ A fun, shareable browser dApp where communities can create vibe profiles (as fro
 
 ## 🔜 To-Do Items
 
-- **Multi-Frog Comparison**: Implement comparison of one community with multiple others
+- **Multi-Community Comparison**: Implement comparison of one community with multiple others
 - **Advanced Search**: Implement full-text search across community profiles
 - **Onboarding Improvements**: Guided tour for first-time users
 - **Match History**: Save and display previous matches
-- **Improved Image Quality**: Better frog image generation with logo incorporation
+- **Improved Image Quality**: Better community image generation with logo incorporation
 - **Community Features**: Upvoting successful collaborations, case studies
 - **Analytics**: Track and display match statistics and collaboration successes
 - **External Integrations**: Connect with Twitter/Discord for easier sharing
@@ -87,19 +86,18 @@ A fun, shareable browser dApp where communities can create vibe profiles (as fro
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser to see the app.
 
-## 🏆 Recently Completed
+## Recent Updates
 
-- ✅ **Enhanced Visual Variety**: Added colorful and randomized card styles for greater visual appeal
-- ✅ **Fixed Download Functionality**: Fixed image download to preserve rounded corners and styling
-- ✅ **Improved Twitter Share**: Enhanced Twitter sharing with better image capabilities
-- ✅ **Fixed UI Layout**: Cleaned up match percentage display for better clarity
-- ✅ **Improved Mobile Responsiveness**: Better card layout for all screen sizes
-- ✅ **Enhanced Match Algorithm**: Adjusted match scoring for more varied and meaningful percentages
-- ✅ **Added "View Details" Button**: Users can now view full community details before running a comparison
-- ✅ **Enhanced Landing Page**: New landing hero with clear explanation of VibeCheck's value
-- ✅ **Fixed Tag Display**: Now properly shows all tags on community cards
-- ✅ **Reflection Question Preview**: Users can now see and choose from available reflection questions
-- ✅ **Intelligent Match Percentage**: Implemented sophisticated algorithm for meaningful match scores
+Our latest improvements have focused on streamlining the UI and enhancing the user experience:
+
+- Redesigned the interface to focus on communities rather than the previous frog theme
+- Simplified the user flow by focusing on single community selection for the MVP
+- Enhanced visual design with improved card styling and consistent color scheme
+- Fixed navigation issues throughout the application
+- Improved loading indicators to match the overall design aesthetic
+- Created a more intuitive search and filtering experience
+
+These changes create a more focused MVP that delivers the core value proposition - matching communities based on their vibes - in a clean, modern interface.
 
 ## 🌟 Contributing
 
