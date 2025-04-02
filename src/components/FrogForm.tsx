@@ -319,7 +319,7 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
               // Check if selected  
               const isSelected = selectedTags.includes(tag);
               // Only disable if not selected AND we're at 5 tags AND this is not an edit of a profile that had 5+ tags
-              const isDisabled = !isSelected && selectedTags.length >= 5 && !(initialData?.tags?.length >= 5);
+              const isDisabled = !isSelected && selectedTags.length >= 5 && !(initialData?.tags && initialData.tags.length >= 5);
               
               return (
                 <button
