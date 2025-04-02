@@ -21,6 +21,100 @@ body {
   min-height: 100vh;
 }
 
+/* Standardized gradients */
+.gradient-bg {
+  @apply bg-gradient-to-r from-pink-50 to-purple-50;
+}
+
+.gradient-border {
+  @apply border border-pink-200;
+}
+
+.gradient-hover {
+  @apply hover:border-pink-300 hover:shadow-md hover:shadow-pink-100;
+}
+
+/* Standardized button styles */
+.btn-primary {
+  @apply px-6 py-3 rounded-full font-semibold transition-all duration-200 shadow-md;
+  @apply bg-gradient-to-r from-pink-50 to-purple-50;
+  @apply border border-pink-200;
+  @apply text-pink-600;
+  @apply hover:border-pink-300 hover:shadow-lg hover:shadow-pink-100;
+  @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-200;
+}
+
+.btn-secondary {
+  @apply px-6 py-3 rounded-full font-semibold transition-all duration-200 shadow-md;
+  @apply bg-white;
+  @apply border border-pink-100;
+  @apply text-pink-600;
+  @apply hover:border-pink-200 hover:shadow-lg hover:shadow-pink-50;
+  @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-100;
+}
+
+/* Card styles */
+.card {
+  @apply rounded-xl shadow-md overflow-hidden;
+  @apply bg-gradient-to-r from-pink-50 to-purple-50;
+  @apply border border-pink-200;
+}
+
+.card-hover {
+  @apply hover:shadow-lg hover:shadow-pink-100;
+  @apply transition-all duration-200;
+}
+
+/* Tag styles */
+.tag {
+  @apply inline-block text-xs bg-pink-100 text-pink-700 px-2.5 py-0.5 rounded-full truncate max-w-full;
+}
+
+.tag-sm {
+  @apply tag;
+}
+
+.tag-md {
+  @apply tag text-sm px-3 py-1;
+}
+
+.tag-lg {
+  @apply tag text-base px-4 py-1.5;
+}
+
+/* Profile picture styles */
+.profile-picture {
+  @apply rounded-full overflow-hidden;
+  @apply bg-gradient-to-r from-pink-50 to-purple-50;
+  @apply border border-pink-200;
+  @apply shadow-md;
+}
+
+.profile-picture-sm {
+  @apply profile-picture w-12 h-12;
+}
+
+.profile-picture-md {
+  @apply profile-picture w-16 h-16;
+}
+
+.profile-picture-lg {
+  @apply profile-picture w-36 h-36;
+}
+
+.profile-picture img {
+  @apply w-full h-full object-cover;
+}
+
+/* Logo container styles */
+.logo-container {
+  @apply rounded-full overflow-hidden;
+  @apply bg-gradient-to-r from-pink-50 to-purple-50;
+  @apply border border-pink-200;
+  @apply shadow-md;
+}
+
+/* Animation classes */
 .animate-float {
   animation: float 3s ease-in-out infinite;
 }
@@ -92,4 +186,24 @@ body {
   animation: none !important;
   transform: none !important;
   transition: none !important;
+}
+
+/* Background to match frog-card */
+.frog-details-bg {
+  @apply bg-gradient-to-r from-pink-50 to-purple-50 border border-pink-200 rounded-xl shadow-md;
+}
+
+/* Emoji fallback */
+.emoji-placeholder {
+  @apply w-full h-full flex items-center justify-center text-pink-600 text-4xl font-bold gradient-bg;
+}
+
+/* Frog logo container */
+.profile-picture-inner {
+  @apply w-full h-full gradient-bg;
+}
+
+/* Overlay for frog image */
+.frog-image-overlay {
+  @apply absolute -bottom-4 -right-1 w-14 h-14 profile-picture-sm p-1;
 }
