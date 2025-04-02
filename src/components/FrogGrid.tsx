@@ -11,10 +11,9 @@ interface FrogGridProps {
   onEditFrog?: (frog: Frog) => void;
 }
 
-export default function FrogGrid({ frogs, selectedFrog, onSelectFrog, onCompareFrogs, onEditFrog }: FrogGridProps) {
+export default function FrogGrid({ frogs, selectedFrog, onSelectFrog, onEditFrog }: FrogGridProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [selectedFrogs, setSelectedFrogs] = useState<Frog[]>([]);
   
   // Sort frogs alphabetically by name
   const sortedFrogs = useMemo(() => 
@@ -102,23 +101,6 @@ export default function FrogGrid({ frogs, selectedFrog, onSelectFrog, onCompareF
               </span>
             </div>
           )}
-
-          <button
-            onClick={() => {
-              if (selectedFrogs.length === 0) {
-                // Start multi-select mode by selecting one random frog
-                if (filteredFrogs.length > 0) {
-                  setSelectedFrogs([filteredFrogs[0]]);
-                }
-              } else {
-                // Exit multi-select mode
-                setSelectedFrogs([]);
-              }
-            }}
-            className="whitespace-nowrap px-4 py-2 bg-lily-green text-white rounded-full text-sm font-medium hover:bg-opacity-90 transition-colors"
-          >
-            {selectedFrogs.length === 0 ? "Select multiple" : "Cancel selection"}
-          </button>
         </div>
         
         {/* Selected tags */}
@@ -142,66 +124,21 @@ export default function FrogGrid({ frogs, selectedFrog, onSelectFrog, onCompareF
 
         <div className="mt-3">
           <p className="text-sm text-gray-600">
-            {selectedFrogs.length === 0
-              ? "Click on a community to see your vibe match"
-              : "Click additional cards to select multiple, then compare"
-            }
+            Click on a community to see your vibe match
           </p>
         </div>
       </div>
       
-      {/* Multi-selection controls */}
-      {selectedFrogs.length > 0 && (
-        <div className="mb-4 p-4 bg-lily-green bg-opacity-10 rounded-lg border border-lily-green shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center">
-              <span className="text-lily-green font-medium">{selectedFrogs.length} communities selected</span>
-            </div>
-            <div className="flex gap-2">
-              <button 
-                onClick={() => setSelectedFrogs([])} 
-                className="px-3 py-1.5 bg-white border border-gray-300 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors"
-              >
-                Clear selection
-              </button>
-              <button
-                className="px-4 py-1.5 bg-lily-green text-white rounded-full text-sm font-medium hover:bg-opacity-90 transition-colors flex items-center"
-                onClick={() => onCompareFrogs(selectedFrogs)}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-                Compare Selected
-              </button>
-            </div>
-          </div>
-          <p className="text-sm text-lily-green mt-1">
-            Click the button above to see how these communities match with yours
-          </p>
-        </div>
-      )}
+
       
       {/* Communities grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {filteredFrogs.map(frog => (
           <motion.div
             key={frog.id}
-            className={`relative bg-white rounded-lg overflow-hidden ${selectedFrogs.includes(frog) ? 'shadow-lg border-2 border-lily-green' : 'shadow-md border border-gray-200'} hover:shadow-xl hover:border-lily-green transition-all cursor-pointer`}
+            className="relative bg-white rounded-lg overflow-hidden shadow-md border border-gray-200 hover:shadow-xl hover:border-lily-green transition-all cursor-pointer"
             whileHover={{ y: -5, transition: { duration: 0.2 } }}
-            onClick={() => {
-              // If already selected, remove from selection
-              if (selectedFrogs.includes(frog)) {
-                setSelectedFrogs(selectedFrogs.filter(f => f.id !== frog.id));
-              } 
-              // If it's the first selection, add to selection
-              else if (selectedFrogs.length > 0) {
-                setSelectedFrogs([...selectedFrogs, frog]);
-              }
-              // If no current selection, just select this frog directly
-              else {
-                onSelectFrog(frog);
-              }
-            }}
+            onClick={() => onSelectFrog(frog)}
           >
             
             {/* Edit button */}
@@ -220,13 +157,6 @@ export default function FrogGrid({ frogs, selectedFrog, onSelectFrog, onCompareF
             {/* Logo */}
             <div className="w-full aspect-square bg-white flex items-center justify-center p-4 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-pink-100 to-purple-100 z-0"></div>
-              {selectedFrogs.includes(frog) && (
-                <div className="absolute top-2 right-2 bg-lily-green text-white rounded-full w-6 h-6 flex items-center justify-center shadow-md z-20">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-              )}
               <img 
                 src={frog.logo_url || getDefaultImage(frog.name)} 
                 alt={`${frog.name} logo`} 

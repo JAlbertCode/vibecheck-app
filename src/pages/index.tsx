@@ -305,7 +305,6 @@ export default function Home() {
                 frogs={frogs}
                 selectedFrog={myFrog}
                 onSelectFrog={handleSelectCompareFrog}
-                onCompareFrogs={handleCompareMultiple}
                 onEditFrog={handleEditFrog}
               />
             </div>
