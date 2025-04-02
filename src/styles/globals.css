@@ -170,22 +170,40 @@ body {
   }
 }
 
-/* Class for fixing html2canvas rendering issues */
-.capturing-card {
-  position: relative !important;
-  transform: none !important;
-  /* Force all child elements to fully render */
-  transform-style: flat !important;
-  /* Ensure proper text placement */
-  text-align: left !important;
-  /* Prevent any animations during capture */
-  animation: none !important;
+/* Class for stabilizing text position during html2canvas capture */
+.vibe-export {
+  font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
 }
 
-.capturing-card * {
-  animation: none !important;
+.vibe-export * {
+  position: static !important;
   transform: none !important;
   transition: none !important;
+  animation: none !important;
+  transform-style: flat !important;
+  transform-origin: center center !important;
+  font-kerning: none !important;
+  text-rendering: geometricPrecision !important;
+  overflow: visible !important;
+}
+
+.vibe-export p,
+.vibe-export h1,
+.vibe-export h2,
+.vibe-export h3,
+.vibe-export h4,
+.vibe-export h5,
+.vibe-export h6,
+.vibe-export span,
+.vibe-export a,
+.vibe-export div {
+  font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif !important;
+  line-height: 1.2 !important;
+  letter-spacing: normal !important;
+  word-spacing: normal !important;
+  text-transform: none !important;
 }
 
 /* Background to match frog-card */

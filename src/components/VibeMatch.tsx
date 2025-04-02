@@ -3,6 +3,40 @@ import { motion } from 'framer-motion';
 import html2canvas from 'html2canvas';
 import type { Frog, VibeMatch as VibeMatchType } from '../utils/supabase';
 
+// Helper function to ensure stable image capture
+const captureElement = async (element: HTMLElement) => {
+  // Ensure fonts are loaded
+  await document.fonts.ready;
+  
+  // Add CSS classes for stable rendering
+  element.classList.add('vibe-export', 'html2canvas-element');
+  
+  try {
+    // Force a repaint
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    
+    // Create the canvas
+    const canvas = await html2canvas(element, {
+      backgroundColor: '#ffffff',
+      useCORS: true,
+      allowTaint: true,
+      scale: 3,
+      logging: false,
+      onclone: (clonedDoc) => {
+        const cloned = clonedDoc.querySelector('[data-match-card]');
+        if (cloned) {
+          cloned.classList.add('html2canvas-element');
+        }
+      }
+    });
+    
+    return canvas;
+  } finally {
+    // Clean up
+    element.classList.remove('vibe-export', 'html2canvas-element');
+  }
+};
+
 interface VibeMatchProps {
   myFrog: Frog;
   otherFrog: Frog;
@@ -64,100 +98,59 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
     return () => clearTimeout(timer);
   }, []);
 
-  // Fix for Twitter share - use the same simplified approach
   const handleShareOnTwitter = async () => {
     if (!matchCardRef.current) return;
-    
+  
+    const element = matchCardRef.current;
+    // Add css class for stable capture
+    element.classList.add('html2canvas-element');
+  
     try {
-      // Add a small delay to ensure all elements are rendered properly
+      // Force font loading
+      await document.fonts.ready;
+      
+      // Wait for rendering to settle
       await new Promise(resolve => setTimeout(resolve, 300));
-      // Use the same approach as download but with extra handling for images
-      const element = matchCardRef.current;
-      
-      // Pre-load all images to ensure they're properly rendered in the canvas
-      const images = Array.from(element.querySelectorAll('img'));
-      await Promise.all(images.map(img => {
-        if (img.complete) return Promise.resolve();
-        return new Promise(resolve => {
-          img.onload = resolve;
-          img.onerror = resolve; // Continue even if an image fails to load
-        });
-      }));
-      
-      // Apply special rendering options
-      const options = {
+  
+      const canvas = await html2canvas(element, {
         backgroundColor: '#ffffff',
         useCORS: true,
         allowTaint: true,
         scale: 3,
-        logging: false,
-        width: element.offsetWidth,
-        height: element.offsetHeight + 10, // Add small buffer
-        ignoreElements: (node: Element) => {
-          return node.classList && node.classList.contains('download-ignore');
-        },
-        // Critical for getting exact pixel-perfect image
-        onclone: (doc: Document, element: Element) => {
-          // We need to ensure all elements maintain their positions
-          const allNodes = element.querySelectorAll('*');
-          allNodes.forEach(node => {
-            if (node instanceof HTMLElement) {
-              // Freeze all positions to prevent shifting
-              node.style.transform = 'none';
-              node.style.transition = 'none';
-              node.style.animation = 'none';
-            }
-          });
-        }
-      };
-      
-      // Create the image directly
-      const canvas = await html2canvas(element, options);
-      
-      // Get blob for sharing
+        logging: false
+      });
+  
       canvas.toBlob(async (blob) => {
-        if (!blob) {
-          // Fallback to text-only sharing
-          shareTextOnly();
-          return;
-        }
-        
-        // Prepare Twitter share content
-        let matchQuality = '';
-        if (match.match_score >= 85) matchQuality = '🔥 Perfect Match';
-        else if (match.match_score >= 70) matchQuality = '✨ Strong Alignment';
-        else if (match.match_score >= 50) matchQuality = '👍 Good Vibes';
-        else matchQuality = '🌱 Growing Potential';
-        
-        const text = `${myFrog.name} × ${otherFrog.name} - ${matchQuality}! Check out our collab potential on @Lilypad_Tech #VibeCheck`;
-        const url = 'https://vibecheck.lilypad.tech'; 
-        
-        // First try Web Share API with the image
+        if (!blob) return shareTextOnly();
+  
+        const text = `${myFrog.name} × ${otherFrog.name} - ${
+          match.match_score >= 85 ? '🔥 Perfect Match' :
+          match.match_score >= 70 ? '✨ Strong Alignment' :
+          match.match_score >= 50 ? '👍 Good Vibes' : '🌱 Growing Potential'
+        }! Check out our collab potential on @Lilypad_Tech #VibeCheck`;
+        const url = 'https://vibecheck.lilypad.tech';
+  
         if (navigator.share) {
           try {
             const file = new File([blob], 'vibecheck.png', { type: 'image/png' });
-            
-            await navigator.share({
-              text: text,
-              url: url,
-              files: [file]
-            });
-            return;
+            await navigator.share({ text, url, files: [file] });
           } catch (error) {
             console.error('Web Share API error:', error);
-            // Fall back to our custom preview dialog
-            showPreviewDialog(canvas, text, url);
           }
         } else {
-          // Show preview dialog with Twitter link
-          showPreviewDialog(canvas, text, url);
+          const imgUrl = canvas.toDataURL('image/png');
+          window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
         }
       });
     } catch (error) {
-      console.error('Error sharing to Twitter:', error);
+      console.error('Twitter share error:', error);
       shareTextOnly();
+    } finally {
+      // Clean up
+      element.classList.remove('html2canvas-element');
     }
   };
+  
   
   // Helper function to show image preview with Twitter link
   const showPreviewDialog = (canvas: HTMLCanvasElement, text: string, url: string) => {
@@ -277,162 +270,96 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
 
   const handleDownload = async () => {
     if (!matchCardRef.current) return;
-    
+  
+    const element = matchCardRef.current;
+    // Add css class for stable capture
+    element.classList.add('html2canvas-element');
+  
     try {
-      // Add a small delay to ensure all elements are rendered properly
+      // Force font loading
+      await document.fonts.ready;
+      
+      // Wait for rendering to settle
       await new Promise(resolve => setTimeout(resolve, 300));
-      
-      // Get the element and create an exact copy for screenshot
-      const element = matchCardRef.current;
-      
-      // Fix: Use a technique that preserves the exact layout
-      // Apply special rendering options for download
-      const options = {
+  
+      const canvas = await html2canvas(element, {
         backgroundColor: '#ffffff',
         useCORS: true,
         allowTaint: true,
         scale: 2,
-        logging: false,
-        width: element.offsetWidth,
-        height: element.offsetHeight + 10, // Add small buffer
-        ignoreElements: (node: Element) => {
-          return node.classList && node.classList.contains('download-ignore');
-        },
-        // Critical for getting exact pixel-perfect image
-        onclone: (doc: Document, element: Element) => {
-          // We need to ensure all elements maintain their positions
-          const allNodes = element.querySelectorAll('*');
-          allNodes.forEach(node => {
-            if (node instanceof HTMLElement) {
-              // Freeze all positions to prevent shifting
-              node.style.transform = 'none';
-              node.style.transition = 'none';
-              node.style.animation = 'none';
-            }
-          });
-        }
-      };
-      
-      // Ensure images are fully loaded before creating canvas
-      const images = Array.from(element.querySelectorAll('img'));
-      await Promise.all(images.map(img => {
-        if (img.complete) return Promise.resolve();
-        return new Promise(resolve => {
-          img.onload = resolve;
-          img.onerror = resolve; // Continue even if an image fails to load
-        });
-      }));
-      
-      // Create the image directly from the original element
-      const canvas = await html2canvas(element, options);
-      
-      // Convert to PNG and download
+        logging: false
+      });
+  
       const image = canvas.toDataURL('image/png');
       const anchor = document.createElement('a');
       anchor.href = image;
       anchor.download = `vibecheck-${myFrog.name}-${otherFrog.name}.png`;
       anchor.click();
     } catch (error) {
-      console.error('Error generating image:', error);
+      console.error('Download error:', error);
       alert('Failed to download match card. Please try again.');
+    } finally {
+      // Clean up
+      element.classList.remove('html2canvas-element');
     }
   };
+  
 
   const handleCopyToClipboard = async () => {
     if (!matchCardRef.current) return;
-    
+  
+    const element = matchCardRef.current;
+    // Add css class for stable capture
+    element.classList.add('html2canvas-element');
+  
     try {
-      // Add a small delay to ensure all elements are rendered properly
+      // Force font loading
+      await document.fonts.ready;
+      
+      // Wait for rendering to settle
       await new Promise(resolve => setTimeout(resolve, 300));
-      
-      // Use the same simplified approach as download for consistency
-      const element = matchCardRef.current;
-      
-      // Apply special rendering options
-      const options = {
+  
+      const canvas = await html2canvas(element, {
         backgroundColor: '#ffffff',
-        useCORS: true, 
+        useCORS: true,
         allowTaint: true,
         scale: 3,
-        logging: false,
-        width: element.offsetWidth,
-        height: element.offsetHeight + 10, // Add small buffer
-        ignoreElements: (node: Element) => {
-          return node.classList && node.classList.contains('download-ignore');
-        },
-        // Critical for getting exact pixel-perfect image
-        onclone: (doc: Document, element: Element) => {
-          // We need to ensure all elements maintain their positions
-          const allNodes = element.querySelectorAll('*');
-          allNodes.forEach(node => {
-            if (node instanceof HTMLElement) {
-              // Freeze all positions to prevent shifting
-              node.style.transform = 'none';
-              node.style.transition = 'none';
-              node.style.animation = 'none';
-              
-              // Ensure fixed dimensions for all elements
-              if (node.style.width) node.style.width = node.offsetWidth + 'px';
-              if (node.style.height) node.style.height = node.offsetHeight + 'px';
-              
-              // If this is a tag, ensure it doesn't wrap
-              if (node instanceof HTMLElement && 
-                  (node.classList?.contains('tag') || (node.textContent?.trim()?.length || 0) < 20)) {
-                node.style.whiteSpace = 'nowrap';
-              }
-            }
-          });
-          
-          // Force all images to load
-          const images = element.querySelectorAll('img');
-          images.forEach(img => {
-            // Create a new Image object to force loading
-            const newImg = new Image();
-            newImg.src = img.src;
-            // Keep the original attributes
-            img.crossOrigin = 'anonymous';
-            img.style.objectFit = 'contain';
-          });
-        }
-      };
-      
-      // Create the image directly from the original element
-      const canvas = await html2canvas(element, options);
-      
+        logging: false
+      });
+  
       canvas.toBlob(async (blob) => {
-        if (!blob) return;
+        if (!blob) throw new Error('Canvas failed to create blob');
         
-        try {
-          await navigator.clipboard.write([
-            new ClipboardItem({ 'image/png': blob })
-          ]);
-          // Show success notification
-          const notification = document.createElement('div');
-          notification.textContent = '✅ Copied to clipboard!';
-          notification.style.position = 'fixed';
-          notification.style.bottom = '20px';
-          notification.style.left = '50%';
-          notification.style.transform = 'translateX(-50%)';
-          notification.style.backgroundColor = '#10b981';
-          notification.style.color = 'white';
-          notification.style.padding = '10px 20px';
-          notification.style.borderRadius = '20px';
-          notification.style.zIndex = '1000';
-          document.body.appendChild(notification);
-          
-          setTimeout(() => {
-            document.body.removeChild(notification);
-          }, 3000);
-        } catch (error) {
-          console.error('Error copying to clipboard:', error);
-          alert('Failed to copy to clipboard. Try downloading instead.');
-        }
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': blob })
+        ]);
+  
+        // Notify success
+        const notification = document.createElement('div');
+        notification.textContent = '✅ Copied to clipboard!';
+        Object.assign(notification.style, {
+          position: 'fixed',
+          bottom: '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: '#10b981',
+          color: 'white',
+          padding: '10px 20px',
+          borderRadius: '20px',
+          zIndex: 1000,
+        });
+        document.body.appendChild(notification);
+        setTimeout(() => document.body.removeChild(notification), 3000);
       });
     } catch (error) {
-      console.error('Error generating image for clipboard:', error);
+      console.error('Clipboard error:', error);
       alert('Failed to copy to clipboard. Try downloading instead.');
+    } finally {
+      // Clean up
+      element.classList.remove('html2canvas-element');
     }
   };
+  
 
   // Format contact links for display
   const getContactLink = (frog: Frog, type: string) => {
@@ -499,6 +426,61 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
   // For logo styling
   const logoSize = "w-12 h-12 md:w-14 md:h-14";
 
+  // This function is called when copying/sharing to ensure consistent positioning of all elements
+  const fixAllPositions = () => {
+    if (!matchCardRef.current) return;
+    const container = matchCardRef.current;
+    
+    // Force a repaint before capturing
+    requestAnimationFrame(() => {
+      // Fix all text elements
+      const textElements = container.querySelectorAll('p, h1, h2, h3, h4, h5, h6, span, a');
+      textElements.forEach(el => {
+        if (el instanceof HTMLElement) {
+          // Store computed styles to make them explicit
+          const computedStyle = window.getComputedStyle(el);
+          el.style.lineHeight = computedStyle.lineHeight;
+          el.style.fontSize = computedStyle.fontSize;
+          el.style.fontWeight = computedStyle.fontWeight;
+          el.style.display = 'inline-block';
+          el.style.textAlign = computedStyle.textAlign;
+          el.style.verticalAlign = 'middle';
+          el.style.position = 'static';
+          el.style.transform = 'none';
+        }
+      });
+      
+      // Fix all flex container elements
+      const flexContainers = container.querySelectorAll('.flex, [style*="display: flex"]');
+      flexContainers.forEach(el => {
+        if (el instanceof HTMLElement) {
+          // Make sure flex doesn't cause text to shift
+          el.style.minHeight = `${el.offsetHeight}px`;
+          el.style.minWidth = `${el.offsetWidth}px`;
+          el.style.display = 'block';
+          el.style.position = 'static';
+        }
+      });
+      
+      // Fix absolute positioned elements
+      const absoluteElements = container.querySelectorAll('[style*="position: absolute"], [class*="absolute"]');
+      absoluteElements.forEach(el => {
+        if (el instanceof HTMLElement) {
+          // Get current position
+          const rect = el.getBoundingClientRect();
+          const containerRect = container.getBoundingClientRect();
+          
+          // Make position explicit
+          el.style.position = 'absolute';
+          el.style.top = `${rect.top - containerRect.top}px`;
+          el.style.left = `${rect.left - containerRect.left}px`;
+          el.style.width = `${rect.width}px`;
+          el.style.height = `${rect.height}px`;
+        }
+      });
+    });
+  };
+  
   return (
     <div className="max-w-3xl mx-auto">
       {/* Match Card (for download/sharing) */}
@@ -515,6 +497,8 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
           height: 'auto',
           paddingTop: '20px',
           paddingBottom: '60px',
+          WebkitFontSmoothing: 'antialiased',
+          MozOsxFontSmoothing: 'grayscale',
         }}
       >
         {/* Decorative elements */}
@@ -529,7 +513,7 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
         {/* Header with company logos and match visualization */}
         <div className="flex flex-col items-center text-center mb-2">
           <div className="flex items-center gap-3 mb-3">
-            <div className={`${logoSize} rounded-full overflow-hidden bg-white shadow flex items-center justify-center`}
+          <div className={`${logoSize} rounded-full overflow-hidden gradient-bg shadow flex items-center justify-center`}
                  style={{border: `2px solid ${brandTheme.primaryColor}`}}>
               <img 
                 src={myFrog.logo_url} 
@@ -569,7 +553,7 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
               </div>
           </div>
             
-            <div className={`${logoSize} rounded-full overflow-hidden bg-white shadow flex items-center justify-center`}
+          <div className={`${logoSize} rounded-full overflow-hidden gradient-bg shadow flex items-center justify-center`}
                  style={{border: `2px solid ${brandTheme.secondaryColor}`}}>
               <img 
                 src={otherFrog.logo_url} 
@@ -616,14 +600,14 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
           </div>
           
           {/* Shared Tags */}
-          <div className="flex flex-wrap gap-3 justify-center mt-5 mb-4 px-2" style={{minHeight: '32px'}}>
+          <div className="flex flex-wrap gap-2 justify-center mt-5 mb-4 px-2 min-h-[32px]">
             {sharedTags.map((tag, i) => (
-              <span key={i} className="text-xs text-white px-4 py-2 rounded-full shadow-sm tag"
-                   style={{backgroundColor: siteColors.primary, whiteSpace: 'nowrap'}}>
+              <span key={i} className="tag-sm">
                 {tag}
               </span>
             ))}
           </div>
+
         </div>
         
         {/* Content */}
@@ -781,41 +765,30 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
       </div>
       
       {/* Share buttons */}
-      <div className="mt-8 flex flex-col sm:flex-row justify-center gap-6 download-ignore" style={{padding: '0 16px'}}>
-        <button
-          onClick={handleDownload}
-          className="px-6 py-3 bg-[#60dba8] text-gray-800 font-semibold rounded-full border border-[#d9f1e9] hover:bg-[#4bcb96] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#10b981] flex items-center justify-center transition-colors duration-200 shadow-md"
-          style={{whiteSpace: 'nowrap', minWidth: '130px'}}
-        >
-          <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-            <path d="M10 3.5a.5.5 0 01.5.5v9.793l3.146-3.147a.5.5 0 01.708.708l-4 4a.5.5 0 01-.708 0l-4-4a.5.5 0 01.708-.708L9.5 13.793V4a.5.5 0 01.5-.5z"></path>
+      <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4 download-ignore px-4">
+        <button onClick={handleDownload} className="btn-primary flex items-center gap-2 justify-center min-w-[130px]">
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 3.5a.5.5 0 01.5.5v9.793l3.146-3.147a.5.5 0 01.708.708l-4 4a.5.5 0 01-.708 0l-4-4a.5.5 0 01.708-.708L9.5 13.793V4a.5.5 0 01.5-.5z" />
           </svg>
           Save Image
         </button>
-        
-        <button
-          onClick={handleCopyToClipboard}
-          className="px-6 py-3 bg-[#e9fff6] text-gray-700 font-semibold rounded-full border border-[#d9f1e9] hover:bg-[#dcf5ed] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#10b981] flex items-center justify-center transition-colors duration-200 shadow-md"
-          style={{whiteSpace: 'nowrap', minWidth: '150px'}}
-        >
-          <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-            <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z"></path>
-            <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z"></path>
+
+        <button onClick={handleCopyToClipboard} className="btn-primary flex items-center gap-2 justify-center min-w-[150px]">
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+            <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
           </svg>
           Copy to Clipboard
         </button>
-        
-        <button
-          onClick={handleShareOnTwitter}
-          className="px-6 py-3 bg-[#90f8d3] text-gray-700 font-semibold rounded-full border border-[#d9f1e9] hover:bg-[#7de9c4] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#10b981] flex items-center justify-center transition-colors duration-200 shadow-md"
-          style={{whiteSpace: 'nowrap', minWidth: '150px'}}
-        >
-          <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085a4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+
+        <button onClick={handleShareOnTwitter} className="btn-primary flex items-center gap-2 justify-center min-w-[150px]">
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
           </svg>
           Share on Twitter
         </button>
       </div>
+
     </div>
   );
 }
