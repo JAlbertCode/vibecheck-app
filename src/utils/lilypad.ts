@@ -10,7 +10,7 @@ const isMockMode = !process.env.NEXT_PUBLIC_LILYPAD_API_KEY;
 
 // Helper function to retry API calls
 async function fetchWithRetry(url: string, options: RequestInit, maxRetries = 3, delay = 2000): Promise<Response> {
-  let lastError: Error;
+  let lastError: Error = new Error('API call failed after multiple retries');
   
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
