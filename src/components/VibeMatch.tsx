@@ -376,7 +376,8 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
               if (node.style.height) node.style.height = node.offsetHeight + 'px';
               
               // If this is a tag, ensure it doesn't wrap
-              if (node.classList.contains('tag') || node.textContent?.trim().length < 20) {
+              if (node instanceof HTMLElement && 
+                  (node.classList?.contains('tag') || (node.textContent?.trim()?.length || 0) < 20)) {
                 node.style.whiteSpace = 'nowrap';
               }
             }
