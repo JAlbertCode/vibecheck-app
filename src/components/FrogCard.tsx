@@ -11,29 +11,29 @@ interface FrogCardProps {
 }
 
 export default function FrogCard({ frog, onClick, isSelected = false }: FrogCardProps) {
-  // Generate default images on first render
   const [logoImage, setLogoImage] = useState<string>(frog.logo_url || '');
-  
-  // Initialize default images immediately
+
   useEffect(() => {
     if (!frog.logo_url || frog.logo_url.includes('placeholder.com')) {
-      // Run in next tick to ensure client-side execution
       const img = getDefaultImage(frog.name);
       setLogoImage(img);
     } else {
       setLogoImage(frog.logo_url);
     }
   }, [frog.name, frog.logo_url]);
+
   return (
     <motion.div
-      className={`frog-card p-4 rounded-lg shadow-sm transition-all duration-200 ${isSelected ? 'border-2 border-lily-green bg-green-50' : 'border border-gray-200 hover:border-lily-green hover:shadow-md'}`}
+      className={`frog-card p-4 rounded-lg shadow-sm transition-all duration-200 ${
+        isSelected ? 'border-2 border-lily-green bg-green-50' : 'border border-gray-200 hover:border-lily-green hover:shadow-md'
+      }`}
       whileHover={{ y: -5 }}
       onClick={onClick}
     >
       <div className="flex items-center space-x-4">
-        <div className="relative w-16 h-16 rounded-full overflow-hidden bg-pond-light flex-shrink-0">
+        <div className="relative w-16 h-16 rounded-full overflow-hidden gradient-bg flex-shrink-0">
           {frog.image_url ? (
-            <div className="w-full h-full bg-pond-light">
+            <div className="w-full h-full gradient-bg">
               <img
                 src={frog.image_url}
                 alt={`${frog.name} frog`}
@@ -42,8 +42,7 @@ export default function FrogCard({ frog, onClick, isSelected = false }: FrogCard
               />
             </div>
           ) : (
-            <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-lily-green to-blue-400 text-white text-xl font-bold overflow-hidden">
-              {/* Use emoji based on first letter of name */}
+            <div className="flex items-center justify-center w-full h-full gradient-bg text-white text-xl font-bold overflow-hidden">
               <span className="text-3xl">
                 {["🐸", "🦋", "🪷", "🌿", "✨", "🌊", "🧩", "🎮", "🚀", "🔮", "🧠", "🎨", "🔧", "🌱", "🧪", "💫", "🪄", "🧬", "🪴", "🐙", "🦄", "🦎", "🐝", "🐬", "🐢", "🦚"][frog.name.charCodeAt(0) % 26]}
               </span>
@@ -55,13 +54,12 @@ export default function FrogCard({ frog, onClick, isSelected = false }: FrogCard
               alt={`${frog.name} logo`}
               className="w-full h-full object-contain rounded-full"
               onError={() => {
-                // If image fails to load, use default
                 setLogoImage(getDefaultImage(frog.name));
               }}
             />
           </div>
         </div>
-        
+
         <div className="flex-1 min-w-0">
           <h3 className="text-lg font-medium text-pond-dark truncate">{frog.name}</h3>
           <div className="flex flex-wrap gap-1 mt-1">
@@ -73,9 +71,9 @@ export default function FrogCard({ frog, onClick, isSelected = false }: FrogCard
           </div>
         </div>
       </div>
-      
+
       <p className="mt-2 text-sm text-gray-600 line-clamp-2">{frog.bio}</p>
-      
+
       <div className="mt-2 text-sm font-medium flex items-center justify-between">
         {isSelected ? (
           <span className="text-lily-green flex items-center gap-1">
@@ -87,7 +85,7 @@ export default function FrogCard({ frog, onClick, isSelected = false }: FrogCard
         ) : (
           <span className="text-gray-400 text-xs">Click to select</span>
         )}
-        <button 
+        <button
           onClick={(e) => {
             e.stopPropagation();
             window.dispatchEvent(new CustomEvent('view-frog-details', { detail: frog }));
