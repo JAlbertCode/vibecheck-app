@@ -236,61 +236,64 @@ export default function Home() {
         return (
           <div className="space-y-6">
             {myFrog && (
-              <div className="bg-white rounded-lg shadow-md p-4 flex items-center">
-                <div className="w-14 h-14 rounded-full overflow-hidden bg-gray-50 flex items-center justify-center mr-4">
-                  <img 
-                    src={myFrog.logo_url} 
-                    alt={`${myFrog.name} logo`} 
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      // Create a canvas-based fallback image
-                      const canvas = document.createElement('canvas');
-                      canvas.width = 100;
-                      canvas.height = 100;
-                      const ctx = canvas.getContext('2d');
-                      if (ctx) {
-                        ctx.fillStyle = '#00cc88';
-                        ctx.beginPath();
-                        ctx.arc(50, 50, 50, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.fillStyle = '#ffffff';
-                        ctx.font = 'bold 40px Arial';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillText(myFrog.name.charAt(0).toUpperCase(), 50, 50);
-                        (e.target as HTMLImageElement).src = canvas.toDataURL();
-                      }
-                    }}
-                  />
-                </div>
-                
-                <div className="flex-1">
-                  <h2 className="text-xl font-bold">{myFrog.name}</h2>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {myFrog.tags.slice(0, 3).map((tag, index) => (
-                      <span key={index} className="text-xs bg-gray-100 px-2 py-0.5 rounded-full">
-                        {tag}
-                      </span>
-                    ))}
-                    {myFrog.tags.length > 3 && (
-                      <span className="text-xs text-gray-500">+{myFrog.tags.length - 3} more</span>
-                    )}
+              <div className="bg-white rounded-lg shadow-md p-5 mb-6">
+                <div className="flex items-center mb-3">
+                  <div className="w-16 h-16 rounded-full overflow-hidden bg-gradient-to-r from-pink-200 to-purple-200 flex items-center justify-center mr-5 shadow-sm">
+                    <img 
+                      src={myFrog.logo_url} 
+                      alt={`${myFrog.name} logo`} 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        // Create a canvas-based fallback image
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 100;
+                        canvas.height = 100;
+                        const ctx = canvas.getContext('2d');
+                        if (ctx) {
+                          ctx.fillStyle = '#EC4899';
+                          ctx.beginPath();
+                          ctx.arc(50, 50, 50, 0, Math.PI * 2);
+                          ctx.fill();
+                          ctx.fillStyle = '#ffffff';
+                          ctx.font = 'bold 40px "Space Grotesk"';
+                          ctx.textAlign = 'center';
+                          ctx.textBaseline = 'middle';
+                          ctx.fillText(myFrog.name.charAt(0).toUpperCase(), 50, 50);
+                          (e.target as HTMLImageElement).src = canvas.toDataURL();
+                        }
+                      }}
+                    />
+                  </div>
+                  
+                  <div className="flex-1">
+                    <h2 className="text-2xl font-bold">{myFrog.name}</h2>
+                    <p className="text-sm text-gray-600 mt-1">{myFrog.bio.substring(0, 100)}{myFrog.bio.length > 100 && '...'}</p>
+                  </div>
+                  
+                  <div className="flex gap-2 ml-4">
+                    <button
+                      onClick={() => handleEditFrog(myFrog)}
+                      className="flex items-center px-3 py-1.5 bg-white border border-lily-green text-lily-green rounded-full text-sm font-medium hover:bg-lily-green hover:text-white transition-colors"
+                    >
+                      <span className="mr-1">✎</span>
+                      Edit
+                    </button>
+                    <button
+                      onClick={handleChangeFrog}
+                      className="flex items-center px-3 py-1.5 bg-white border border-gray-300 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors"
+                    >
+                      <span className="mr-1">←</span>
+                      Change
+                    </button>
                   </div>
                 </div>
                 
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleEditFrog(myFrog)}
-                    className="text-lily-green hover:underline text-sm font-medium"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={handleChangeFrog}
-                    className="text-lily-green hover:underline text-sm font-medium"
-                  >
-                    Change
-                  </button>
+                <div className="flex flex-wrap gap-1.5 mt-3">
+                  {myFrog.tags.map((tag, index) => (
+                    <span key={index} className="text-sm bg-lily-green bg-opacity-10 text-lily-green px-3 py-1 rounded-full">
+                      {tag}
+                    </span>
+                  ))}
                 </div>
               </div>
             )}
@@ -315,9 +318,9 @@ export default function Home() {
             <div>
               <button
                 onClick={handleBackToBrowse}
-                className="mb-6 flex items-center text-lily-green hover:underline"
+                className="mb-6 flex items-center px-4 py-2 bg-white rounded-lg shadow-sm hover:shadow text-lily-green border border-lily-green"
               >
-                <span className="mr-1">←</span>
+                <span className="mr-2">←</span>
                 <span>Back to communities</span>
               </button>
               
