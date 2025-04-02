@@ -45,7 +45,13 @@ export default function FrogForm({ onSubmit, initialData }: FrogFormProps) {
   const [otherLinks, setOtherLinks] = useState('');
   const [linkedinHandle, setLinkedinHandle] = useState(initialData?.contact_links?.linkedin || '');
   const [contactLinks, setContactLinks] = useState<Record<string, string>>(
-    initialData?.contact_links || {
+    initialData?.contact_links ? 
+    // Convert any undefined values to empty strings
+    Object.fromEntries(
+      Object.entries(initialData.contact_links).map(([key, value]) => 
+        [key, value || '']
+      )
+    ) : {
       twitter: '',
       site: '',
       linkedin: ''
