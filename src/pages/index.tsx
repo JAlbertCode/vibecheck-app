@@ -235,7 +235,7 @@ export default function Home() {
       case 'BROWSE_FROGS':
         return (
           <div className="space-y-6">
-            {myFrog && (
+              {myFrog && (
               <div className="bg-white rounded-lg shadow-md p-5 mb-6">
                 <div className="flex items-center mb-3">
                   <div className="w-16 h-16 rounded-full overflow-hidden bg-gradient-to-r from-pink-200 to-purple-200 flex items-center justify-center mr-5 shadow-sm">

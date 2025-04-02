@@ -186,7 +186,7 @@ export default function FrogGrid({ frogs, selectedFrog, onSelectFrog, onCompareF
         {filteredFrogs.map(frog => (
           <motion.div
             key={frog.id}
-            className={`relative bg-white rounded-lg overflow-hidden ${selectedFrogs.includes(frog) ? 'shadow-md border-2 border-lily-green' : 'shadow-sm border border-gray-200'} hover:shadow-lg hover:border-lily-green transition-all cursor-pointer`}
+            className={`relative bg-white rounded-lg overflow-hidden ${selectedFrogs.includes(frog) ? 'shadow-lg border-2 border-lily-green' : 'shadow-md border border-gray-200'} hover:shadow-xl hover:border-lily-green transition-all cursor-pointer`}
             whileHover={{ y: -5, transition: { duration: 0.2 } }}
             onClick={() => {
               // If already selected, remove from selection
@@ -218,7 +218,8 @@ export default function FrogGrid({ frogs, selectedFrog, onSelectFrog, onCompareF
             )}
             
             {/* Logo */}
-            <div className="w-full aspect-square bg-gradient-to-br from-pink-50 to-purple-50 flex items-center justify-center p-4 relative overflow-hidden">
+            <div className="w-full aspect-square bg-white flex items-center justify-center p-4 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-pink-100 to-purple-100 z-0"></div>
               {selectedFrogs.includes(frog) && (
                 <div className="absolute top-2 right-2 bg-lily-green text-white rounded-full w-6 h-6 flex items-center justify-center shadow-md z-20">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
