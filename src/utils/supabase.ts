@@ -16,7 +16,7 @@ try {
   supabaseClient = {
     from: () => ({
       insert: () => ({ select: () => ({ data: [], error: null }) }),
-      update: () => ({ eq: () => ({ data: null, error: null }) }),
+      update: () => ({ eq: () => ({ select: () => ({ data: [], error: null }) }) }),
       select: () => ({ data: [], error: null }),
       eq: () => ({ single: () => ({ data: null, error: null }) })
     })
