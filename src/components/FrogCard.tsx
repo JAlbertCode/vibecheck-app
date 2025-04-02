@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import type { Frog } from '../utils/supabase';
 import { getDefaultImage } from '../utils/defaultImages';
+import Link from 'next/link';
 
 interface FrogCardProps {
   frog: Frog;
@@ -91,7 +92,7 @@ export default function FrogCard({ frog, onClick, isSelected = false }: FrogCard
             e.stopPropagation();
             window.dispatchEvent(new CustomEvent('view-frog-details', { detail: frog }));
           }}
-          className="text-xs py-1 px-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition-colors"
+          className="text-xs py-1 px-2 bg-lily-green hover:bg-opacity-90 text-white rounded transition-colors"
         >
           View Details
         </button>

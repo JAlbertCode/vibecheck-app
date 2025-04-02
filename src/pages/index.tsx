@@ -47,13 +47,43 @@ export default function Home() {
     }
   }, [frogs]);
   
-  // Load frogs on initial render
+  // Load frogs on initial render and handle URL parameters
   useEffect(() => {
     const loadFrogs = async () => {
       setIsLoading(true);
       try {
         const loadedFrogs = await getFrogs();
         setFrogs(loadedFrogs);
+        
+        // Check for frog ID in URL parameter
+        const params = new URLSearchParams(window.location.search);
+        const sharedFrogId = params.get('frog');
+        
+        if (sharedFrogId) {
+          // Set the first frog as "my frog" for demonstration
+          if (loadedFrogs.length > 0) {
+            const myFrogFromList = loadedFrogs[0];
+            setMyFrog(myFrogFromList);
+            
+            // Find the shared frog
+            const sharedFrog = loadedFrogs.find(frog => frog.id === sharedFrogId);
+            
+            if (sharedFrog && sharedFrog.id !== myFrogFromList.id) {
+              // Skip the selection screen and go straight to comparison
+              setCurrentStep('BROWSE_FROGS');
+              
+              // Show a notification to the user
+              setTimeout(() => {
+                const shouldCompare = confirm(`Someone shared ${sharedFrog.name} with you! Would you like to check your vibes with them?`);
+                
+                if (shouldCompare) {
+                  // Trigger comparison
+                  handleSelectCompareFrog(sharedFrog);
+                }
+              }, 1000);
+            }
+          }
+        }
       } catch (error) {
         console.error('Error loading frogs:', error);
       } finally {
@@ -214,6 +244,28 @@ export default function Home() {
     setCurrentStep('SELECT_FROG');
     setCurrentMatch(null);
   };
+  
+  // Set up event listener for compare-with-frog events
+  useEffect(() => {
+    const handleCompareWithFrog = (event: Event) => {
+      const customEvent = event as CustomEvent<Frog>;
+      const frogToCompare = customEvent.detail;
+      
+      if (!myFrog) return; // Ensure we have a frog selected
+      
+      // Don't allow comparing with own frog
+      if (frogToCompare.id === myFrog.id) return;
+      
+      // Call the comparison handler
+      handleSelectCompareFrog(frogToCompare);
+    };
+    
+    window.addEventListener('compare-with-frog', handleCompareWithFrog);
+    
+    return () => {
+      window.removeEventListener('compare-with-frog', handleCompareWithFrog);
+    };
+  }, [myFrog, handleSelectCompareFrog]);
   
   // Render appropriate content based on current step
   const renderContent = () => {

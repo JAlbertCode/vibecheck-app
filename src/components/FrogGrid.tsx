@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { getDefaultImage } from '../utils/defaultImages';
 import { motion } from 'framer-motion';
 import type { Frog } from '../utils/supabase';
+import FrogDetails from './FrogDetails';
 
 interface FrogGridProps {
   frogs: Frog[];
@@ -14,6 +15,8 @@ interface FrogGridProps {
 export default function FrogGrid({ frogs, selectedFrog, onSelectFrog, onEditFrog }: FrogGridProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [detailsFrog, setDetailsFrog] = useState<Frog | null>(null);
+  const [showDetails, setShowDetails] = useState(false);
   
   // Sort frogs alphabetically by name
   const sortedFrogs = useMemo(() => 
@@ -138,7 +141,10 @@ export default function FrogGrid({ frogs, selectedFrog, onSelectFrog, onEditFrog
             key={frog.id}
             className="relative bg-white rounded-lg overflow-hidden shadow-md border border-gray-200 hover:shadow-xl hover:border-lily-green transition-all cursor-pointer"
             whileHover={{ y: -5, transition: { duration: 0.2 } }}
-            onClick={() => onSelectFrog(frog)}
+            onClick={() => {
+              setDetailsFrog(frog);
+              setShowDetails(true);
+            }}
           >
             
             {/* Edit button */}
@@ -168,6 +174,8 @@ export default function FrogGrid({ frogs, selectedFrog, onSelectFrog, onEditFrog
               {/* Decorative elements */}
               <div className="absolute -bottom-4 -right-4 w-16 h-16 rounded-full bg-pink-200 opacity-20 blur-xl"></div>
               <div className="absolute -top-4 -left-4 w-12 h-12 rounded-full bg-purple-200 opacity-20 blur-lg"></div>
+              
+              {/* No action buttons - card itself is clickable */}
             </div>
             
             {/* Info */}
@@ -214,6 +222,15 @@ export default function FrogGrid({ frogs, selectedFrog, onSelectFrog, onEditFrog
           )}
         </div>
       )}
+      
+      {/* Details Modal */}
+      <FrogDetails
+        isOpen={showDetails}
+        onClose={() => setShowDetails(false)}
+        frog={detailsFrog}
+        onEditFrog={onEditFrog}
+        onSelectFrog={onSelectFrog}
+      />
     </div>
   );
 }

@@ -7,9 +7,11 @@ interface FrogDetailsProps {
   isOpen: boolean;
   onClose: () => void;
   frog: Frog | null;
+  onEditFrog?: (frog: Frog) => void;
+  onSelectFrog?: (frog: Frog) => void;
 }
 
-export default function FrogDetails({ isOpen, onClose, frog }: FrogDetailsProps) {
+export default function FrogDetails({ isOpen, onClose, frog, onEditFrog, onSelectFrog }: FrogDetailsProps) {
   if (!frog) return null;
   
   // Generate default logo image if needed
@@ -22,6 +24,20 @@ export default function FrogDetails({ isOpen, onClose, frog }: FrogDetailsProps)
       setLogoImage(frog.logo_url);
     }
   }, [frog]);
+
+  // Handle checking vibes
+  const handleCheckVibes = () => {
+    onClose();
+    
+    // If a select handler is provided, use that first
+    if (onSelectFrog) {
+      // Dispatch a custom event to trigger comparison with this frog
+      window.dispatchEvent(new CustomEvent('compare-with-frog', { detail: frog }));
+    } else {
+      // Dispatch a custom event as fallback
+      window.dispatchEvent(new CustomEvent('compare-with-frog', { detail: frog }));
+    }
+  };
 
   // Format reflection questions
   const reflectionQuestions = [
@@ -68,7 +84,7 @@ export default function FrogDetails({ isOpen, onClose, frog }: FrogDetailsProps)
           onClick={onClose}
         >
           <motion.div
-            className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6"
+            className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6"
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
@@ -172,14 +188,43 @@ export default function FrogDetails({ isOpen, onClose, frog }: FrogDetailsProps)
               </div>
             )}
             
-            {/* Footer with close button */}
-            <div className="mt-6 flex justify-end">
-              <button
-                onClick={onClose}
-                className="px-4 py-2 bg-lily-green text-white font-medium rounded-md shadow-sm hover:bg-opacity-90 focus:outline-none transition-colors"
-              >
-                Close
-              </button>
+            {/* Footer with action buttons */}
+            <div className="mt-6 space-y-4">
+              <div className="flex justify-between items-center">
+                <button
+                  onClick={handleCheckVibes}
+                  className="w-full px-4 py-3 bg-lily-green text-white font-semibold rounded-md shadow-sm hover:bg-opacity-90 focus:outline-none transition-colors"
+                >
+                  Check Vibes with This Community
+                </button>
+              </div>
+              
+              <div className="flex justify-between items-center gap-4">
+                {onEditFrog && (
+                  <button
+                    onClick={() => {
+                      onClose();
+                      onEditFrog(frog);
+                    }}
+                    className="flex-1 px-4 py-2 border border-lily-green text-lily-green font-medium rounded-md hover:bg-lily-green hover:text-white focus:outline-none transition-colors"
+                  >
+                    Edit Community
+                  </button>
+                )}
+                
+                {onSelectFrog && (
+                  <button
+                    onClick={() => {
+                      onClose();
+                      // Also trigger the regular select functionality for direct comparison
+                      onSelectFrog(frog);
+                    }}
+                    className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 font-medium rounded-md shadow-sm hover:bg-gray-300 focus:outline-none transition-colors"
+                  >
+                    Select (No Vibe Check)
+                  </button>
+                )}
+              </div>
             </div>
           </motion.div>
         </motion.div>

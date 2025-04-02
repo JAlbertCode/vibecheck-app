@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/router';
 import FrogCard from '../components/FrogCard';
 import FrogDetails from '../components/FrogDetails';
 import VibeMatch from '../components/VibeMatch';
@@ -10,6 +11,9 @@ import Link from 'next/link';
 import { getDefaultImage } from '../utils/defaultImages';
 
 export default function Pond() {
+  const router = useRouter();
+  const { compare: compareFrogId } = router.query;
+  
   const [frogs, setFrogs] = useState<Frog[]>([]);
   const [loading, setLoading] = useState(true);
   const [myFrog, setMyFrog] = useState<Frog | null>(null);
@@ -30,6 +34,14 @@ export default function Pond() {
         // For demo purposes, set the first frog as "my frog"
         if (allFrogs.length > 0) {
           setMyFrog(allFrogs[0]);
+        }
+        
+        // If there's a compare parameter in the URL, select that frog
+        if (compareFrogId && typeof compareFrogId === 'string') {
+          const frogToCompare = allFrogs.find(frog => frog.id === compareFrogId);
+          if (frogToCompare) {
+            setSelectedFrog(frogToCompare);
+          }
         }
         
         // Pre-generate all default images in the background
@@ -55,19 +67,42 @@ export default function Pond() {
     
     loadFrogs();
     
-    // Set up event listener for viewing frog details
+    // Set up event listeners
     const handleViewDetails = (event: Event) => {
       const customEvent = event as CustomEvent<Frog>;
       setDetailsFrog(customEvent.detail);
       setShowDetails(true);
     };
     
+    const handleCompareWithFrog = (event: Event) => {
+      const customEvent = event as CustomEvent<Frog>;
+      const frogToCompare = customEvent.detail;
+      
+      // Don't allow comparing with own frog
+      if (myFrog && frogToCompare.id === myFrog.id) return;
+      
+      // Set the selected frog and update URL
+      setSelectedFrog(frogToCompare);
+      setMatch(null);
+      
+      router.replace(
+        {
+          pathname: '/pond',
+          query: { compare: frogToCompare.id },
+        },
+        undefined,
+        { shallow: true }
+      );
+    };
+    
     window.addEventListener('view-frog-details', handleViewDetails);
+    window.addEventListener('compare-with-frog', handleCompareWithFrog);
     
     return () => {
       window.removeEventListener('view-frog-details', handleViewDetails);
+      window.removeEventListener('compare-with-frog', handleCompareWithFrog);
     };
-  }, []);
+  }, [compareFrogId]);
   
   // This ensures we don't show the same frog twice
   const otherFrogs = frogs.filter(frog => !myFrog || frog.id !== myFrog.id);
@@ -83,6 +118,16 @@ export default function Pond() {
       // Otherwise, select the clicked frog
       setSelectedFrog(frog);
       setMatch(null);
+      
+      // Update URL to include the selected frog's ID
+      router.replace(
+        {
+          pathname: '/pond',
+          query: { compare: frog.id },
+        },
+        undefined,
+        { shallow: true }
+      );
     }
   };
 
@@ -101,6 +146,13 @@ export default function Pond() {
       setCompareLoading(false);
     }
   };
+  
+  // Auto-trigger comparison when frog is selected via URL and data is loaded
+  useEffect(() => {
+    if (myFrog && selectedFrog && !match && !compareLoading) {
+      handleCompare();
+    }
+  }, [myFrog, selectedFrog]);
 
   // already defined above
 
@@ -179,7 +231,25 @@ export default function Pond() {
             {/* Other Frogs Section */}
             <div>
               <h2 className="text-xl font-semibold text-pond-dark mb-4">Other Communities</h2>
-              <p className="text-gray-500 text-sm mb-4">Click on a community to select it, then check your vibes using the button to the left.</p>
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-gray-500 text-sm">Click on a community to select it, then check your vibes using the button to the left.</p>
+                {selectedFrog && (
+                  <div className="text-sm flex items-center gap-1 bg-lily-green bg-opacity-20 text-pond-dark px-3 py-1 rounded-full">
+                    <span className="font-medium">{selectedFrog.name}</span>
+                    <span>selected</span>
+                    <button
+                      onClick={() => {
+                        setSelectedFrog(null);
+                        setMatch(null);
+                        router.replace('/pond', undefined, { shallow: true });
+                      }}
+                      className="ml-1 text-gray-500 hover:text-gray-700"
+                    >
+                      ×
+                    </button>
+                  </div>
+                )}
+              </div>
               
               {otherFrogs.length === 0 ? (
                 <div className="bg-white p-6 rounded-xl shadow-lg text-center">
