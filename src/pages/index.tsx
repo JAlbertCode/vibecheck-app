@@ -105,24 +105,24 @@ export default function Home() {
     setCurrentStep('CREATE_FROG');
   };
   
-  // Handle form submission for new frog
+  // Handle form submission for new community profile
   const handleFormSubmit = async (frogData: Omit<Frog, 'id' | 'image_url'>) => {
     setIsLoading(true);
     
     try {
-      // Check if we're editing an existing frog or creating a new one
+      // Check if we're editing an existing profile or creating a new one
       if (editingFrog) {
-        // Update existing frog
+        // Update existing profile
         const imageUrl = editingFrog.image_url || null;
         const updatedFrog = await updateFrog(editingFrog.id, {
           ...frogData,
           image_url: imageUrl
         });
         
-        // Update frogs list
+        // Update profiles list
         setFrogs(frogs.map(frog => frog.id === updatedFrog.id ? updatedFrog : frog));
         
-        // If this was the selected frog, update it
+        // If this was the selected profile, update it
         if (myFrog && myFrog.id === updatedFrog.id) {
           setMyFrog(updatedFrog);
         }
@@ -130,59 +130,25 @@ export default function Home() {
         // Reset editing state
         setEditingFrog(null);
         
-        // Move to browse frogs
+        // Move to browse communities
         setCurrentStep('BROWSE_FROGS');
       } else {
-        // Create a new frog
+        // Create a new community profile
         const newFrog = await createFrog({
           ...frogData,
           image_url: null
         });
         
-        // Ask if user wants to generate image
-        if (confirm('Frog created! Would you like to generate a custom frog image with Lilypad?')) {
-          setIsGeneratingImage(true);
-          try {
-            // Generate image using Lilypad
-            const imageUrl = await generateFrogImage({
-              name: newFrog.name,
-              bio: newFrog.bio,
-              logo_url: newFrog.logo_url,
-              tags: newFrog.tags,
-              reflections: newFrog.reflections,
-              contact_links: newFrog.contact_links
-            });
-            
-            // Update the frog with the image URL
-            await updateFrogImage(newFrog.id, imageUrl);
-            
-            // Refresh the frog data
-            const updatedFrog = await getFrogById(newFrog.id);
-            if (updatedFrog) {
-              // Update frogs list and set as selected
-              setFrogs([...frogs, updatedFrog]);
-              setMyFrog(updatedFrog);
-            }
-          } catch (error) {
-            console.error('Error generating image:', error);
-            // Still set the frog as selected even if image generation fails
-            setFrogs([...frogs, newFrog]);
-            setMyFrog(newFrog);
-          } finally {
-            setIsGeneratingImage(false);
-          }
-        } else {
-          // Just add the new frog to the list and set as selected
-          setFrogs([...frogs, newFrog]);
-          setMyFrog(newFrog);
-        }
+        // Add the new profile to the list and set as selected
+        setFrogs([...frogs, newFrog]);
+        setMyFrog(newFrog);
         
-        // Move to browse frogs
+        // Move to browse communities
         setCurrentStep('BROWSE_FROGS');
       }
     } catch (error) {
-      console.error('Error saving frog:', error);
-      alert('Failed to save your frog profile. Please try again.');
+      console.error('Error saving community profile:', error);
+      alert('Failed to save your community profile. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -288,9 +254,9 @@ export default function Home() {
         return (
           <div className="space-y-6">
               {myFrog && (
-              <div className="bg-white rounded-lg shadow-md p-5 mb-6">
-                <div className="flex items-center mb-3">
-                  <div className="w-16 h-16 rounded-full overflow-hidden bg-gradient-to-r from-pink-200 to-purple-200 flex items-center justify-center mr-5 shadow-sm">
+              <div className="bg-white rounded-lg shadow-md p-4 sm:p-5 mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center mb-3 gap-3">
+                  <div className="w-16 h-16 rounded-full overflow-hidden bg-gradient-to-r from-pink-200 to-purple-200 flex items-center justify-center mx-auto sm:mx-0 sm:mr-5 shadow-sm">
                     <img 
                       src={myFrog.logo_url} 
                       alt={`${myFrog.name} logo`} 
@@ -317,35 +283,35 @@ export default function Home() {
                     />
                   </div>
                   
-                  <div className="flex-1">
-                    <h2 className="text-2xl font-bold">{myFrog.name}</h2>
+                  <div className="flex-1 text-center sm:text-left">
+                    <h2 className="text-xl sm:text-2xl font-bold">{myFrog.name}</h2>
                     <p className="text-sm text-gray-600 mt-1">{myFrog.bio.substring(0, 100)}{myFrog.bio.length > 100 && '...'}</p>
-                  </div>
-                  
-                  <div className="flex gap-2 ml-4">
-                    <button
-                      onClick={() => handleEditFrog(myFrog)}
-                      className="flex items-center px-3 py-1.5 bg-white border border-lily-green text-lily-green rounded-full text-sm font-medium hover:bg-lily-green hover:text-white transition-colors"
-                    >
-                      <span className="mr-1">✎</span>
-                      Edit
-                    </button>
-                    <button
-                      onClick={handleChangeFrog}
-                      className="flex items-center px-3 py-1.5 bg-white border border-gray-300 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors"
-                    >
-                      <span className="mr-1">←</span>
-                      Change
-                    </button>
                   </div>
                 </div>
                 
-                <div className="flex flex-wrap gap-1.5 mt-3">
+                <div className="flex flex-wrap justify-center sm:justify-start gap-1.5 mt-3 mb-4 sm:mb-0">
                   {myFrog.tags.map((tag, index) => (
                     <span key={index} className="text-sm bg-lily-green bg-opacity-10 text-lily-green px-3 py-1 rounded-full">
                       {tag}
                     </span>
                   ))}
+                </div>
+                
+                <div className="flex flex-col sm:flex-row justify-center sm:justify-end gap-2 mt-4 sm:mt-0 sm:ml-4">
+                  <button
+                    onClick={() => handleEditFrog(myFrog)}
+                    className="flex items-center justify-center px-3 py-1.5 bg-white border border-lily-green text-lily-green rounded-full text-sm font-medium hover:bg-lily-green hover:text-white transition-colors w-full sm:w-auto"
+                  >
+                    <span className="mr-1">✎</span>
+                    Edit
+                  </button>
+                  <button
+                    onClick={handleChangeFrog}
+                    className="flex items-center justify-center px-3 py-1.5 bg-white border border-gray-300 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors w-full sm:w-auto"
+                  >
+                    <span className="mr-1">←</span>
+                    Change
+                  </button>
                 </div>
               </div>
             )}

@@ -134,8 +134,8 @@ export default function FrogGrid({ frogs, selectedFrog, onSelectFrog, onEditFrog
       
 
       
-      {/* Communities grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      {/* Communities grid - Optimized for mobile */}
+      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
         {filteredFrogs.map(frog => (
           <motion.div
             key={frog.id}

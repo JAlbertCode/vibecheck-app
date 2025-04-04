@@ -100,7 +100,7 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
       match.match_score >= 50 ? '👍 Good Vibes' : '🌱 Growing Potential';
   
     const text = `${myFrog.name} × ${otherFrog.name} - ${matchQuality}! Check out our collab potential on @Lilypad_Tech #VibeCheck`;
-    const url = 'https://vibecheck.lilypad.tech';
+    const url = 'https://vibecheck-app.vercel.app/';
   
     window.open(
       `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,

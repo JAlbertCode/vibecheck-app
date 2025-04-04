@@ -77,7 +77,7 @@ export default function FrogDetails({ isOpen, onClose, frog, onEditFrog, onSelec
         >
           <div className="flex justify-center items-start min-h-screen p-4">
             <motion.div
-              className="card frog-details-bg w-full max-w-4xl my-12 p-6"
+              className="card frog-details-bg w-full max-w-4xl my-8 sm:my-12 p-4 sm:p-6 mx-4 sm:mx-auto"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
@@ -92,7 +92,7 @@ export default function FrogDetails({ isOpen, onClose, frog, onEditFrog, onSelec
 
               <div className="flex flex-col md:flex-row gap-4 mb-6">
                 <div className="flex-shrink-0 flex items-center justify-center">
-                  <div className="profile-picture-lg relative">
+                  <div className="profile-picture-lg relative mx-auto md:mx-0">
                     {(!logoImage || logoImage === '') ? (
                       <div className="emoji-placeholder">
                         <span className="text-4xl">
@@ -122,13 +122,13 @@ export default function FrogDetails({ isOpen, onClose, frog, onEditFrog, onSelec
                   </div>
                 </div>
 
-                <div className="flex-1">
+                <div className="flex-1 text-center md:text-left">
                   <h3 className="text-lg font-medium mb-2 text-pink-600">About</h3>
                   <p className="text-gray-700">{frog.bio}</p>
 
                   <div className="mt-4">
                     <h3 className="text-lg font-medium mb-2 text-pink-600">Vibe Tags</h3>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap justify-center md:justify-start gap-2">
                       {frog.tags.map((tag, index) => (
                         <span key={index} className="tag-sm">
                           {tag}
@@ -159,8 +159,8 @@ export default function FrogDetails({ isOpen, onClose, frog, onEditFrog, onSelec
 
               <div className="mb-6">
                 <h3 className="text-lg font-medium mb-3 text-pink-600">Connect</h3>
-                <div className="flex flex-wrap gap-2">
-                  <button onClick={handleCheckVibes} className="btn-primary flex items-center gap-1">
+                <div className="flex flex-col sm:flex-row flex-wrap gap-2">
+                  <button onClick={handleCheckVibes} className="btn-primary flex items-center justify-center gap-1 w-full sm:w-auto">
                     <span>✨</span>
                     <span>Check Vibes</span>
                   </button>
@@ -170,7 +170,7 @@ export default function FrogDetails({ isOpen, onClose, frog, onEditFrog, onSelec
                       href={link.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="btn-primary flex items-center gap-1"
+                      className="btn-primary flex items-center justify-center gap-1 w-full sm:w-auto"
                     >
                       <span>{link.icon}</span>
                       <span>{link.label}</span>
@@ -181,8 +181,8 @@ export default function FrogDetails({ isOpen, onClose, frog, onEditFrog, onSelec
 
               {onEditFrog && (
                 <div className="flex justify-center">
-                  <button onClick={() => { onClose(); onEditFrog(frog); }} className="btn-primary">
-                    Edit
+                  <button onClick={() => { onClose(); onEditFrog(frog); }} className="btn-primary w-full sm:w-auto">
+                    Edit Community
                   </button>
                 </div>
               )}
