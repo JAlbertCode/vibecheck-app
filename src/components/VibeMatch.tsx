@@ -92,57 +92,28 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
   }, []);
 
   const handleShareOnTwitter = async () => {
-    if (!matchCardRef.current) return;
+    await handleDownload(); // reuse the working image export
   
-    const element = matchCardRef.current;
-    // Add css class for stable capture
-    element.classList.add('html2canvas-element');
+    const matchQuality =
+      match.match_score >= 85 ? '🔥 Perfect Match' :
+      match.match_score >= 70 ? '✨ Strong Alignment' :
+      match.match_score >= 50 ? '👍 Good Vibes' : '🌱 Growing Potential';
   
-    try {
-      // Force font loading
-      await document.fonts.ready;
-      
-      // Wait for rendering to settle
-      await new Promise(resolve => setTimeout(resolve, 300));
+    const text = `${myFrog.name} × ${otherFrog.name} - ${matchQuality}! Check out our collab potential on @Lilypad_Tech #VibeCheck`;
+    const url = 'https://vibecheck.lilypad.tech';
   
-      const canvas = await html2canvas(element, {
-        backgroundColor: '#ffffff',
-        useCORS: true,
-        allowTaint: true,
-        scale: 3,
-        logging: false
-      });
-  
-      canvas.toBlob(async (blob) => {
-        if (!blob) return shareTextOnly();
-  
-        const text = `${myFrog.name} × ${otherFrog.name} - ${
-          match.match_score >= 85 ? '🔥 Perfect Match' :
-          match.match_score >= 70 ? '✨ Strong Alignment' :
-          match.match_score >= 50 ? '👍 Good Vibes' : '🌱 Growing Potential'
-        }! Check out our collab potential on @Lilypad_Tech #VibeCheck`;
-        const url = 'https://vibecheck.lilypad.tech';
-  
-        if (navigator.share) {
-          try {
-            const file = new File([blob], 'vibecheck.png', { type: 'image/png' });
-            await navigator.share({ text, url, files: [file] });
-          } catch (error) {
-            console.error('Web Share API error:', error);
-          }
-        } else {
-          const imgUrl = canvas.toDataURL('image/png');
-          window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
-        }
-      });
-    } catch (error) {
-      console.error('Twitter share error:', error);
-      shareTextOnly();
-    } finally {
-      // Clean up
-      element.classList.remove('html2canvas-element');
-    }
+    window.open(
+      `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
+      '_blank'
+    );
   };
+  
+  
+  
+  
+  
+  
+  
   
   
   // Helper function to show image preview with Twitter link
