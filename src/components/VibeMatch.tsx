@@ -2,20 +2,14 @@ import React, { useRef, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import html2canvas from 'html2canvas';
 import type { Frog, VibeMatch as VibeMatchType } from '../utils/supabase';
+import { toPng } from 'html-to-image';
 
 // Helper function to ensure stable image capture
 const captureElement = async (element: HTMLElement) => {
-  // Ensure fonts are loaded
   await document.fonts.ready;
-  
-  // Add CSS classes for stable rendering
   element.classList.add('vibe-export', 'html2canvas-element');
-  
   try {
-    // Force a repaint
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    
-    // Create the canvas
     const canvas = await html2canvas(element, {
       backgroundColor: '#ffffff',
       useCORS: true,
@@ -29,13 +23,12 @@ const captureElement = async (element: HTMLElement) => {
         }
       }
     });
-    
     return canvas;
   } finally {
-    // Clean up
     element.classList.remove('vibe-export', 'html2canvas-element');
   }
 };
+
 
 interface VibeMatchProps {
   myFrog: Frog;
@@ -272,93 +265,92 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
     if (!matchCardRef.current) return;
   
     const element = matchCardRef.current;
-    // Add css class for stable capture
-    element.classList.add('html2canvas-element');
+  
+    // Temporarily override styles that affect layout during capture
+    const originalMargin = element.style.margin;
+    const originalTransform = element.style.transform;
+    const originalPosition = element.style.position;
+    element.style.margin = '0';
+    element.style.transform = 'translateX(0)';
+    element.style.position = 'static';
   
     try {
-      // Force font loading
       await document.fonts.ready;
-      
-      // Wait for rendering to settle
       await new Promise(resolve => setTimeout(resolve, 300));
   
-      const canvas = await html2canvas(element, {
+      const dataUrl = await toPng(element, {
         backgroundColor: '#ffffff',
-        useCORS: true,
-        allowTaint: true,
-        scale: 2,
-        logging: false
+        cacheBust: true,
       });
   
-      const image = canvas.toDataURL('image/png');
       const anchor = document.createElement('a');
-      anchor.href = image;
+      anchor.href = dataUrl;
       anchor.download = `vibecheck-${myFrog.name}-${otherFrog.name}.png`;
       anchor.click();
     } catch (error) {
       console.error('Download error:', error);
       alert('Failed to download match card. Please try again.');
     } finally {
-      // Clean up
-      element.classList.remove('html2canvas-element');
+      element.style.margin = originalMargin;
+      element.style.transform = originalTransform;
+      element.style.position = originalPosition;
     }
   };
+  
   
 
   const handleCopyToClipboard = async () => {
     if (!matchCardRef.current) return;
   
     const element = matchCardRef.current;
-    // Add css class for stable capture
-    element.classList.add('html2canvas-element');
+  
+    const originalMargin = element.style.margin;
+    const originalTransform = element.style.transform;
+    const originalPosition = element.style.position;
+    element.style.margin = '0';
+    element.style.transform = 'translateX(0)';
+    element.style.position = 'static';
   
     try {
-      // Force font loading
       await document.fonts.ready;
-      
-      // Wait for rendering to settle
       await new Promise(resolve => setTimeout(resolve, 300));
   
-      const canvas = await html2canvas(element, {
+      const dataUrl = await toPng(element, {
         backgroundColor: '#ffffff',
-        useCORS: true,
-        allowTaint: true,
-        scale: 3,
-        logging: false
+        cacheBust: true,
       });
   
-      canvas.toBlob(async (blob) => {
-        if (!blob) throw new Error('Canvas failed to create blob');
-        
-        await navigator.clipboard.write([
-          new ClipboardItem({ 'image/png': blob })
-        ]);
+      const blob = await (await fetch(dataUrl)).blob();
   
-        // Notify success
-        const notification = document.createElement('div');
-        notification.textContent = '✅ Copied to clipboard!';
-        Object.assign(notification.style, {
-          position: 'fixed',
-          bottom: '20px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          backgroundColor: '#10b981',
-          color: 'white',
-          padding: '10px 20px',
-          borderRadius: '20px',
-          zIndex: 1000,
-        });
-        document.body.appendChild(notification);
-        setTimeout(() => document.body.removeChild(notification), 3000);
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob })
+      ]);
+  
+      const notification = document.createElement('div');
+      notification.textContent = '✅ Copied to clipboard!';
+      Object.assign(notification.style, {
+        position: 'fixed',
+        bottom: '20px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        backgroundColor: '#10b981',
+        color: 'white',
+        padding: '10px 20px',
+        borderRadius: '20px',
+        zIndex: 1000,
       });
+      document.body.appendChild(notification);
+      setTimeout(() => document.body.removeChild(notification), 3000);
     } catch (error) {
       console.error('Clipboard error:', error);
       alert('Failed to copy to clipboard. Try downloading instead.');
     } finally {
-      // Clean up
-      element.classList.remove('html2canvas-element');
+      element.style.margin = originalMargin;
+      element.style.transform = originalTransform;
+      element.style.position = originalPosition;
     }
   };
+  
   
 
   // Format contact links for display
