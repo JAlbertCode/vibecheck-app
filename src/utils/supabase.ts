@@ -189,7 +189,8 @@ export async function updateFrogImage(id: string, imageUrl: string): Promise<voi
 export async function getFrogs(): Promise<Frog[]> {
   if (isMockMode) {
     console.log('MOCK MODE: Returning mock frogs');
-    return [...mockFrogs];
+    // Sort mock frogs alphabetically by name
+    return [...mockFrogs].sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
   }
   
   const { data, error } = await supabase
@@ -197,7 +198,8 @@ export async function getFrogs(): Promise<Frog[]> {
     .select('*');
   
   if (error) throw error;
-  return data as Frog[];
+  // Sort frogs alphabetically by name
+  return (data as Frog[]).sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
 }
 
 export async function getFrogById(id: string): Promise<Frog | null> {
