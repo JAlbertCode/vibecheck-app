@@ -551,17 +551,6 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
             <span className="font-medium text-lg">{otherFrog.name}</span>
           </div>
           
-          <div className="mt-3 rounded-xl py-2 px-5 inline-block shadow-sm"
-               style={{background: `linear-gradient(to right, ${brandTheme.primaryColor}30, ${brandTheme.secondaryColor}30)`,
-                      border: `1px solid ${brandTheme.primaryColor}50`}}>
-            <span className="text-lg font-medium text-gray-800 flex items-center justify-center">
-              <span className="mr-2">
-                {match.match_score >= 85 ? '🔥' : match.match_score >= 75 ? '✨' : match.match_score >= 65 ? '👍' : '🌱'}
-              </span>
-              {match.summary || "Open Worlds Uniting"}
-            </span>
-          </div>
-          
           {/* Shared Tags */}
           <div className="flex flex-wrap gap-2 justify-center mt-5 mb-4 px-2 min-h-[32px]">
             {sharedTags.map((tag, i) => (
@@ -572,7 +561,7 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
           </div>
 
         </div>
-        
+          
         {/* Content */}
         <div className="mt-4 bg-white rounded-xl p-4 shadow-sm" 
              style={{border: `1px solid ${brandTheme.primaryColor}30`}}>
