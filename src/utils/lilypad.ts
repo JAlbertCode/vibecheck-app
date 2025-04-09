@@ -1,5 +1,4 @@
 import type { Frog, VibeMatch } from './supabase';
-import { DEFAULT_FROG_PROMPT } from './constants';
 
 // Lilypad API endpoints from environment variables
 const LILYPAD_API_URL = process.env.NEXT_PUBLIC_LILYPAD_API_URL || 'https://anura-testnet.lilypad.tech/api/v1';
@@ -45,58 +44,7 @@ async function fetchWithRetry(url: string, options: RequestInit, maxRetries = 3,
   throw lastError || new Error('API call failed after multiple retries');
 }
 
-/**
- * Generate a frog image based on profile details
- */
-export async function generateFrogImage(frog: Omit<Frog, 'id' | 'image_url'>): Promise<string> {
-  try {
-    const tagsList = frog.tags.join(', ');
-    let prompt = DEFAULT_FROG_PROMPT.replace('{tags}', tagsList);
-    
-    // If in mock mode, return placeholder image
-    if (isMockMode) {
-      console.log('MOCK MODE: Returning placeholder frog image instead of calling Lilypad API');
-      // Create a unique seed based on the frog name to get consistent images for the same frog
-      const nameSeed = frog.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      return `https://via.placeholder.com/500/00cc88/ffffff?text=Generated+Frog+${nameSeed}`;
-    }
-    
-    // Prepare the payload for Stable Diffusion
-    const payload = {
-      model: "sdxl:1.0",
-      messages: [
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      options: {
-        image_size: "768x768"
-      }
-    };
 
-    // Call Lilypad API with retry logic
-    console.log('Calling Lilypad API to generate frog image...');
-    const response = await fetchWithRetry(`${LILYPAD_API_URL}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${LILYPAD_API_KEY}`,
-      },
-      body: JSON.stringify(payload)
-    }, 5, 3000); // More retries with longer delays for image generation
-
-    const data = await response.json();
-    
-    // In a real implementation, we would handle the image data appropriately
-    // For this demo, we'll just return a placeholder URL or the one returned by the API
-    // In production, we would upload the image to a storage service and return the URL
-    return data.image_url || "https://via.placeholder.com/500/00cc88/ffffff?text=Generated+Frog";
-  } catch (error) {
-    console.error('Error generating frog image:', error);
-    return "https://via.placeholder.com/500/ff8866/ffffff?text=Image+Generation+Failed";
-  }
-}
 
 /**
  * Compare two frog profiles and get a vibe match

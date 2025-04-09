@@ -2,6 +2,8 @@
 
 A fun, shareable browser dApp where communities can create vibe profiles, compare them with others, and receive a Lilypad-powered vibe match + suggested ways to collaborate.
 
+> **Note**: This app has been optimized and cleaned up to make it more maintainable and easier to understand. The image generation functionality has been removed since it wasn't being used.
+
 ## 🎯 Core MVP Functionality
 
 - ✅ **Create a Vibe Profile**
@@ -27,7 +29,7 @@ A fun, shareable browser dApp where communities can create vibe profiles, compar
 - Tailwind CSS
 - Framer Motion for animations
 - Supabase for storage
-- Lilypad Network for AI (LLM and image generation)
+- Lilypad Network for AI (LLM comparisons using phi4:14b)
 - html2canvas for PNG generation
 
 ## ✅ Implemented Features
@@ -51,7 +53,7 @@ A fun, shareable browser dApp where communities can create vibe profiles, compar
 - **Advanced Search**: Implement full-text search across community profiles
 - **Onboarding Improvements**: Guided tour for first-time users
 - **Match History**: Save and display previous matches
-- **Improved Image Quality**: Better community image generation with logo incorporation
+- **Improved Community Cards**: Better visual representation of communities
 - **Community Features**: Upvoting successful collaborations, case studies
 - **Analytics**: Track and display match statistics and collaboration successes
 - **External Integrations**: Connect with Twitter/Discord for easier sharing
@@ -78,6 +80,8 @@ A fun, shareable browser dApp where communities can create vibe profiles, compar
    NEXT_PUBLIC_LILYPAD_API_URL=https://anura-testnet.lilypad.tech/api/v1
    NEXT_PUBLIC_LILYPAD_API_KEY=your_lilypad_api_key
    ```
+   
+   > **Note**: The app includes a mock mode that works without a Lilypad API key. If you don't provide a valid key, the app will automatically use realistic mock data for community comparisons.
 
 4. Run the development server:
    ```
