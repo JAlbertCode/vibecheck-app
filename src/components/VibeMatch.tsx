@@ -94,16 +94,10 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
   const handleShareOnTwitter = async () => {
     await handleDownload(); // reuse the working image export
   
-    const matchQuality =
-      match.match_score >= 85 ? '🔥 Perfect Match' :
-      match.match_score >= 70 ? '✨ Strong Alignment' :
-      match.match_score >= 50 ? '👍 Good Vibes' : '🌱 Growing Potential';
-  
-    const text = `${myFrog.name} × ${otherFrog.name} - ${matchQuality}! Check out our collab potential on @Lilypad_Tech #VibeCheck`;
-    const url = 'https://vibecheck-app.vercel.app/';
+    const text = `Check out your collab potential at https://vibecheck-app.vercel.app/\n@Lilypad_Tech #VibeCheck`;
   
     window.open(
-      `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
+      `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`,
       '_blank'
     );
   };
@@ -162,7 +156,8 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
       
       // Add twitter share link
       const twitterLink = document.createElement('a');
-      twitterLink.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+      const twitterText = `Check out your collab potential at https://vibecheck-app.vercel.app/\n@Lilypad_Tech #VibeCheck`;
+      twitterLink.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(twitterText)}`;
       twitterLink.target = '_blank';
       twitterLink.style.display = 'inline-block';
       twitterLink.style.padding = '10px 20px';
@@ -217,17 +212,10 @@ export default function VibeMatch({ myFrog, otherFrog, match }: VibeMatchProps) 
   
   // Fallback to text-only Twitter sharing
   const shareTextOnly = () => {
-    let matchQuality = '';
-    if (match.match_score >= 85) matchQuality = '🔥 Perfect Match';
-    else if (match.match_score >= 70) matchQuality = '✨ Strong Alignment';
-    else if (match.match_score >= 50) matchQuality = '👍 Good Vibes';
-    else matchQuality = '🌱 Growing Potential';
-    
-    const text = `${myFrog.name} × ${otherFrog.name} - ${matchQuality}! Check out our collab potential on @Lilypad_Tech #VibeCheck`;
-    const url = 'https://vibecheck.lilypad.tech';
+    const text = `Check out your collab potential at https://vibecheck-app.vercel.app/\n@Lilypad_Tech #VibeCheck`;
     
     window.open(
-      `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
+      `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`,
       '_blank'
     );
   };
