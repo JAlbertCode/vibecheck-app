@@ -169,23 +169,6 @@ export async function updateFrog(id: string, frogData: Omit<Frog, 'id'>): Promis
   return data?.[0] as Frog;
 }
 
-export async function updateFrogImage(id: string, imageUrl: string): Promise<void> {
-  if (isMockMode) {
-    console.log('MOCK MODE: Updating frog image in mock data store');
-    mockFrogs = mockFrogs.map(frog => 
-      frog.id === id ? { ...frog, image_url: imageUrl } : frog
-    );
-    return;
-  }
-  
-  const { error } = await supabase
-    .from('frogs')
-    .update({ image_url: imageUrl })
-    .eq('id', id);
-  
-  if (error) throw error;
-}
-
 export async function getFrogs(): Promise<Frog[]> {
   if (isMockMode) {
     console.log('MOCK MODE: Returning mock frogs');
